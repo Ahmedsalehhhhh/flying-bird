@@ -191,7 +191,7 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
                   <div className="username" dir="ltr">{u.username}</div>
                   {u.note && <div className="muted small user-note">{u.note}</div>}
                 </td>
-                <td><span className="chip">{u.gameId}</span></td>
+                <td><span className="chip" title={u.gameId}>{gameName(games, u.gameId)}</span></td>
                 <td>
                   {u.deviceId ? (
                     <span title={`${u.deviceId}\nاتربط ${formatDateTime(u.deviceBoundAt)}`}>
@@ -347,3 +347,8 @@ function activityTitle(u) {
   }
   return lines.join("\n");
 }
+
+const gameName = (games, gameId) => {
+  const g = games.find((x) => x.gameId === gameId);
+  return g ? g.name : gameId;
+};

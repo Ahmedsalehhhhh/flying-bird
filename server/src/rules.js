@@ -1,6 +1,7 @@
 // Pure helpers (no database) so they are easy to test.
 
 const USERNAME_RE = /^[a-zA-Z0-9_.-]{3,30}$/;
+const GAME_ID_RE = /^[a-z0-9][a-z0-9-]{1,39}$/;
 const DEVICE_RE = /^[a-zA-Z0-9-]{8,64}$/;
 
 function validateUsername(username) {
@@ -12,6 +13,17 @@ function validateUsername(username) {
 function validatePassword(password) {
   if (typeof password !== "string" || password.length < 6 || password.length > 72)
     return "password must be 6-72 chars";
+  return null;
+}
+
+function validateGameId(gameId) {
+  if (typeof gameId !== "string" || !GAME_ID_RE.test(gameId))
+    return "gameId must be 2-40 chars: lowercase letters, numbers, - (not starting with -)";
+  return null;
+}
+
+function validateGameName(name) {
+  if (typeof name !== "string" || !name.trim() || name.trim().length > 60) return "name must be 1-60 chars";
   return null;
 }
 
@@ -149,6 +161,8 @@ module.exports = {
   validateUsername,
   validatePassword,
   validateDeviceId,
+  validateGameId,
+  validateGameName,
   deviceDecision,
   addMonths,
   validateMonths,

@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const { verifyPlayerToken, deviceHash } = require("../tokens");
 const config = require("../config");
+const games = require("../games");
 const { subscriptionStatus, canPlay, SUB_ERRORS, sessionExpired, shouldExtendSession } = require("../rules");
 
 const fail = (res, status, code, message, extra = {}) =>
@@ -40,6 +41,7 @@ module.exports = async function requireAuth(req, res, next) {
     const user = await User.findById(payload.sub);
     if (!user) return fail(res, 401, "TOKEN_INVALID", "account not found");
     if (user.banned) return fail(res, 403, "BANNED", "this account is banned", { reason: user.banReason || "" });
+    if (games.isActive(user.gameId) !== "ok") return fail(res, 403, "GAME_DISABLED", "this game is disabled");
     const status = subscriptionStatus(user);
     if (!canPlay(status)) {
       const e = SUB_ERRORS[status];

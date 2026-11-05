@@ -7,6 +7,7 @@ const { createLimiter } = require("../middleware/rateLimit");
 const { validateDeviceId, deviceDecision, subscriptionStatus, canPlay, SUB_ERRORS, gameSubscription } = require("../rules");
 const { signPlayerToken } = require("../tokens");
 const requireAuth = require("../middleware/requireAuth");
+const games = require("../games");
 
 const router = express.Router();
 
@@ -51,12 +52,13 @@ function logAttempt(req, { user, username, ok, code, deviceId }) {
 //   The session lasts SESSION_DAYS (30) and every /session or /play call pushes it forward again.
 //
 //   200 { ok: true, message, token, session: { expiresAt }, subscription: { startsAt, endsAt, daysLeft } | null }
-//   401 WRONG_CREDENTIALS  | 403 WRONG_DEVICE | 403 BANNED | 429 TOO_MANY_ATTEMPTS
+//   401 WRONG_CREDENTIALS  | 403 WRONG_DEVICE | 403 BANNED | 403 GAME_DISABLED | 429 TOO_MANY_ATTEMPTS
 //   403 NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.post("/login", handle(async (req, res) => {
   const gameId = String((req.body && req.body.gameId) || "").toLowerCase().trim();
-  if (!config.games.has(gameId)) return fail(res, 400, "UNKNOWN_GAME", "unknown gameId");
+  const gameState = games.isActive(gameId);
+  if (gameState === "unknown") return fail(res, 400, "UNKNOWN_GAME", "unknown gameId");
   req.gameId = gameId;
 
   const { username, password, deviceId } = req.body;
@@ -81,6 +83,12 @@ router.post("/login", handle(async (req, res) => {
     return fail(res, 401, "WRONG_CREDENTIALS", "invalid username or password");
   }
   userLimiter.reset(userKey);
+
+  // game turned off by the admin (checked after the password, so it does not reveal anything)
+  if (gameState === "disabled") {
+    logAttempt(req, { user, username: uname, ok: false, code: "GAME_DISABLED", deviceId });
+    return fail(res, 403, "GAME_DISABLED", "this game is disabled");
+  }
 
   // 2) banned?
   if (user.banned) {
@@ -158,7 +166,7 @@ router.post("/login", handle(async (req, res) => {
 //   (token, device, ban, subscription, session). A valid call pushes the session SESSION_DAYS forward.
 //   200 { ok: true, message, user: { username, type }, session: { expiresAt }, subscription }  -> continue
 //   401 NO_TOKEN | TOKEN_EXPIRED (no activity for SESSION_DAYS) | TOKEN_INVALID | DEVICE_MISMATCH | SESSION_ENDED  -> back to login
-//   403 BANNED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
+//   403 BANNED | GAME_DISABLED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.get("/session", requireAuth, (req, res) => {
   res.json({
@@ -178,7 +186,7 @@ router.get("/session", requireAuth, (req, res) => {
 //   The game calls this when the streamer presses PLAY / START.
 //   200 { ok: true, message }  -> start the game
 //   401 NO_TOKEN | TOKEN_EXPIRED (no activity for SESSION_DAYS) | TOKEN_INVALID | DEVICE_MISMATCH | SESSION_ENDED  -> back to login
-//   403 BANNED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
+//   403 BANNED | GAME_DISABLED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.post("/play", requireAuth, (req, res) => {
   res.json({ ok: true, message: "ok to play", session: sessionInfo(req.user), subscription: gameSubscription(req.user) });

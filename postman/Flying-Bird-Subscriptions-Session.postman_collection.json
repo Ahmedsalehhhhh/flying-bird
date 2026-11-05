@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Flying Bird - Subscriptions + Session (all cases)",
-    "description": "Every case of the new / changed requests: streamer subscriptions and the 30-day session.\n\n**How to use**\n1. Variables tab: set `adminPassword` (and `baseUrl` for the live server).\n2. Run collection (in order). It creates its own test accounts (prefixed with a random `runId`) and deletes them at the end.\n3. Requests marked **[reference]** are skipped when running; open their saved example to see the response.\n\nEvery request has a saved example with the real response.\n\n**Game rules**\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
+    "name": "Flying Bird - Subscriptions + Session + Games (all cases)",
+    "description": "Every case of the new / changed requests: streamer subscriptions, the 30-day session and games managed from the dashboard.\n\n**How to use**\n1. Variables tab: set `adminPassword` (and `baseUrl` for the live server).\n2. Run collection (in order). It creates its own test accounts (prefixed with a random `runId`) and deletes them at the end.\n3. Requests marked **[reference]** are skipped when running; open their saved example to see the response.\n\nEvery request has a saved example with the real response.\n\n**Game rules**\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 GAME_DISABLED -> \"this game is currently unavailable\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -212,7 +212,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -308,7 +308,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c980\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_expired\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"expired\",\n      \"startsAt\": \"2026-07-05T14:05:32.235Z\",\n      \"endsAt\": \"2026-08-05T14:05:32.235Z\",\n      \"daysLeft\": 0\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.379Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652c\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_expired\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"expired\",\n      \"startsAt\": \"2026-07-05T14:43:16.061Z\",\n      \"endsAt\": \"2026-08-05T14:43:16.061Z\",\n      \"daysLeft\": 0\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.216Z\"\n  }\n}"
             }
           ]
         },
@@ -404,7 +404,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c982\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_future\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"not_started\",\n      \"startsAt\": \"2026-11-15T15:05:32.235Z\",\n      \"endsAt\": \"2026-12-15T15:05:32.235Z\",\n      \"daysLeft\": 40\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.440Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_future\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"not_started\",\n      \"startsAt\": \"2026-11-15T15:43:16.061Z\",\n      \"endsAt\": \"2026-12-15T15:43:16.061Z\",\n      \"daysLeft\": 40\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.280Z\"\n  }\n}"
             }
           ]
         },
@@ -501,7 +501,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c984\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_expiring\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-10-09T15:05:32.235Z\",\n      \"endsAt\": \"2026-11-09T15:05:32.235Z\",\n      \"daysLeft\": 4\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.502Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f06530\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_expiring\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-10-09T15:43:16.061Z\",\n      \"endsAt\": \"2026-11-09T15:43:16.061Z\",\n      \"daysLeft\": 4\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.342Z\"\n  }\n}"
             }
           ]
         },
@@ -597,7 +597,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c986\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_agency\",\n    \"note\": \"Agency - never expires\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"unlimited\",\n      \"startsAt\": null,\n      \"endsAt\": null,\n      \"daysLeft\": null\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.565Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f06532\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_agency\",\n    \"note\": \"Agency - never expires\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"unlimited\",\n      \"startsAt\": null,\n      \"endsAt\": null,\n      \"daysLeft\": null\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.406Z\"\n  }\n}"
             }
           ]
         },
@@ -693,7 +693,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c988\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_agencysub\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-05-05T15:05:32.235Z\",\n      \"daysLeft\": 181\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.626Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f06534\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_agencysub\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-05-05T15:43:16.061Z\",\n      \"daysLeft\": 181\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.468Z\"\n  }\n}"
             }
           ]
         },
@@ -1350,7 +1350,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:32.803Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:16.644Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -1437,7 +1437,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:32.866Z\"\n  },\n  \"subscription\": null\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:16.711Z\"\n  },\n  \"subscription\": null\n}"
             }
           ]
         },
@@ -1523,7 +1523,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-07-05T14:05:32.235Z\",\n  \"endsAt\": \"2026-08-05T14:05:32.235Z\"\n}"
+              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-07-05T14:43:16.061Z\",\n  \"endsAt\": \"2026-08-05T14:43:16.061Z\"\n}"
             }
           ]
         },
@@ -1608,7 +1608,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_NOT_STARTED\",\n  \"message\": \"subscription has not started yet\",\n  \"startsAt\": \"2026-11-15T15:05:32.235Z\",\n  \"endsAt\": \"2026-12-15T15:05:32.235Z\"\n}"
+              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_NOT_STARTED\",\n  \"message\": \"subscription has not started yet\",\n  \"startsAt\": \"2026-11-15T15:43:16.061Z\",\n  \"endsAt\": \"2026-12-15T15:43:16.061Z\"\n}"
             }
           ]
         },
@@ -2213,7 +2213,7 @@
     },
     {
       "name": "3. Game - Session check  (GET /session)  [NEW]",
-      "description": "Call **every time the game opens**, with the saved token. No body.\n\nHeaders:\n- `Authorization: Bearer <token>`\n- `X-Device-Id: <same deviceId as login>`\n\nA valid call pushes the session **30 days forward** (`session.expiresAt`). The token stays the same.\n\nGame rules:\n- 200 -> continue to the main menu\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
+      "description": "Call **every time the game opens**, with the saved token. No body.\n\nHeaders:\n- `Authorization: Bearer <token>`\n- `X-Device-Id: <same deviceId as login>`\n\nA valid call pushes the session **30 days forward** (`session.expiresAt`). The token stays the same.\n\nGame rules:\n- 200 -> continue to the main menu\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 GAME_DISABLED -> \"this game is currently unavailable\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
       "item": [
         {
           "name": "3.1 Valid session -> 200 (session extended 30 days)",
@@ -2288,7 +2288,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3ogocr_active\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:32.803Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3pt74t_active\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:16.644Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -2363,7 +2363,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3ogocr_agency\",\n    \"type\": \"agency\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:32.866Z\"\n  },\n  \"subscription\": null\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3pt74t_agency\",\n    \"type\": \"agency\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:16.711Z\"\n  },\n  \"subscription\": null\n}"
             }
           ]
         },
@@ -2733,7 +2733,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:33.289Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.128Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -2907,7 +2907,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.289Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.289Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.289Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"expired\",\n      \"startsAt\": \"2026-07-05T14:05:32.235Z\",\n      \"endsAt\": \"2026-08-05T14:05:32.235Z\",\n      \"daysLeft\": 0\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.128Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.128Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.128Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"expired\",\n      \"startsAt\": \"2026-07-05T14:43:16.061Z\",\n      \"endsAt\": \"2026-08-05T14:43:16.061Z\",\n      \"daysLeft\": 0\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -2982,7 +2982,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-07-05T14:05:32.235Z\",\n  \"endsAt\": \"2026-08-05T14:05:32.235Z\"\n}"
+              "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-07-05T14:43:16.061Z\",\n  \"endsAt\": \"2026-08-05T14:43:16.061Z\"\n}"
             }
           ]
         },
@@ -3082,7 +3082,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.289Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.289Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.289Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.128Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.128Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.128Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -3156,7 +3156,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3ogocr_active\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:33.289Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3pt74t_active\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.128Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -3254,7 +3254,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account banned\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.289Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.289Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.289Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": true,\n    \"banReason\": \"Postman test\",\n    \"bannedAt\": \"2026-11-05T15:05:33.361Z\",\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account banned\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.128Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.128Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.128Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": true,\n    \"banReason\": \"Postman test\",\n    \"bannedAt\": \"2026-11-05T15:43:17.200Z\",\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -3428,7 +3428,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"account unbanned\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.289Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.289Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.289Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account unbanned\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.128Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.128Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.128Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -3588,7 +3588,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:33.464Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.302Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -3897,7 +3897,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:33.464Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n    \"daysLeft\": 92\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.302Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n    \"daysLeft\": 92\n  }\n}"
             }
           ]
         },
@@ -3971,7 +3971,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:32.866Z\"\n  },\n  \"subscription\": null\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:16.711Z\"\n  },\n  \"subscription\": null\n}"
             }
           ]
         },
@@ -4291,7 +4291,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"page\": 1,\n  \"limit\": 20,\n  \"total\": 1,\n  \"pages\": 1,\n  \"users\": [\n    {\n      \"id\": \"6aec9b3cf1a01c7de771c980\",\n      \"type\": \"streamer\",\n      \"gameId\": \"flying-bird\",\n      \"username\": \"tmw3ogocr_expired\",\n      \"note\": \"\",\n      \"deviceId\": null,\n      \"deviceBoundAt\": null,\n      \"lastLoginAt\": null,\n      \"lastSeenAt\": null,\n      \"sessionExpiresAt\": null,\n      \"lastLoginIp\": \"\",\n      \"wrongDevice\": null,\n      \"subscription\": {\n        \"status\": \"expired\",\n        \"startsAt\": \"2026-07-05T14:05:32.235Z\",\n        \"endsAt\": \"2026-08-05T14:05:32.235Z\",\n        \"daysLeft\": 0\n      },\n      \"banned\": false,\n      \"banReason\": \"\",\n      \"bannedAt\": null,\n      \"createdAt\": \"2026-11-05T15:05:32.379Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"ok\": true,\n  \"page\": 1,\n  \"limit\": 20,\n  \"total\": 1,\n  \"pages\": 1,\n  \"users\": [\n    {\n      \"id\": \"6aeca414405fa996b3f0652c\",\n      \"type\": \"streamer\",\n      \"gameId\": \"flying-bird\",\n      \"username\": \"tmw3pt74t_expired\",\n      \"note\": \"\",\n      \"deviceId\": null,\n      \"deviceBoundAt\": null,\n      \"lastLoginAt\": null,\n      \"lastSeenAt\": null,\n      \"sessionExpiresAt\": null,\n      \"lastLoginIp\": \"\",\n      \"wrongDevice\": null,\n      \"subscription\": {\n        \"status\": \"expired\",\n        \"startsAt\": \"2026-07-05T14:43:16.061Z\",\n        \"endsAt\": \"2026-08-05T14:43:16.061Z\",\n        \"daysLeft\": 0\n      },\n      \"banned\": false,\n      \"banReason\": \"\",\n      \"bannedAt\": null,\n      \"createdAt\": \"2026-11-05T15:43:16.216Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -4397,7 +4397,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"page\": 1,\n  \"limit\": 20,\n  \"total\": 1,\n  \"pages\": 1,\n  \"users\": [\n    {\n      \"id\": \"6aec9b3cf1a01c7de771c984\",\n      \"type\": \"streamer\",\n      \"gameId\": \"flying-bird\",\n      \"username\": \"tmw3ogocr_expiring\",\n      \"note\": \"\",\n      \"deviceId\": null,\n      \"deviceBoundAt\": null,\n      \"lastLoginAt\": null,\n      \"lastSeenAt\": null,\n      \"sessionExpiresAt\": null,\n      \"lastLoginIp\": \"\",\n      \"wrongDevice\": null,\n      \"subscription\": {\n        \"status\": \"active\",\n        \"startsAt\": \"2026-10-09T15:05:32.235Z\",\n        \"endsAt\": \"2026-11-09T15:05:32.235Z\",\n        \"daysLeft\": 4\n      },\n      \"banned\": false,\n      \"banReason\": \"\",\n      \"bannedAt\": null,\n      \"createdAt\": \"2026-11-05T15:05:32.502Z\"\n    }\n  ]\n}"
+              "body": "{\n  \"ok\": true,\n  \"page\": 1,\n  \"limit\": 20,\n  \"total\": 1,\n  \"pages\": 1,\n  \"users\": [\n    {\n      \"id\": \"6aeca414405fa996b3f06530\",\n      \"type\": \"streamer\",\n      \"gameId\": \"flying-bird\",\n      \"username\": \"tmw3pt74t_expiring\",\n      \"note\": \"\",\n      \"deviceId\": null,\n      \"deviceBoundAt\": null,\n      \"lastLoginAt\": null,\n      \"lastSeenAt\": null,\n      \"sessionExpiresAt\": null,\n      \"lastLoginIp\": \"\",\n      \"wrongDevice\": null,\n      \"subscription\": {\n        \"status\": \"active\",\n        \"startsAt\": \"2026-10-09T15:43:16.061Z\",\n        \"endsAt\": \"2026-11-09T15:43:16.061Z\",\n        \"daysLeft\": 4\n      },\n      \"banned\": false,\n      \"banReason\": \"\",\n      \"bannedAt\": null,\n      \"createdAt\": \"2026-11-05T15:43:16.342Z\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -4469,7 +4469,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.464Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.464Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.464Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-02-05T15:05:32.235Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  },\n  \"logins\": [\n    {\n      \"at\": \"2026-11-05T15:05:33.467Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:05:33.292Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:05:33.129Z\",\n      \"ok\": false,\n      \"code\": \"WRONG_DEVICE\",\n      \"deviceId\": \"PC-TEST-0002\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:05:33.065Z\",\n      \"ok\": false,\n      \"code\": \"WRONG_CREDENTIALS\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:05:32.806Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    }\n  ]\n}"
+              "body": "{\n  \"ok\": true,\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.302Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.302Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.302Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-02-05T15:43:16.061Z\",\n      \"daysLeft\": 92\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  },\n  \"logins\": [\n    {\n      \"at\": \"2026-11-05T15:43:17.304Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:43:17.130Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:43:16.969Z\",\n      \"ok\": false,\n      \"code\": \"WRONG_DEVICE\",\n      \"deviceId\": \"PC-TEST-0002\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:43:16.905Z\",\n      \"ok\": false,\n      \"code\": \"WRONG_CREDENTIALS\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-05T15:43:16.649Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0001\",\n      \"ip\": \"::1\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -4559,7 +4559,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"stats\": {\n    \"totalUsers\": 4,\n    \"loggedInToday\": 1,\n    \"notBound\": 3,\n    \"bannedUsers\": 0,\n    \"wrongDeviceAttempts\": 1,\n    \"expiringSoon\": 1,\n    \"expiredSubs\": 1,\n    \"loginsPerDay\": [\n      {\n        \"date\": \"2026-10-23\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-24\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-25\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-26\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-27\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-28\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-29\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-30\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-31\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-01\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-02\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-03\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-04\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-05\",\n        \"count\": 3\n      }\n    ],\n    \"perGame\": [\n      {\n        \"gameId\": \"flying-bird\",\n        \"users\": 4\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"stats\": {\n    \"totalUsers\": 4,\n    \"loggedInToday\": 1,\n    \"notBound\": 3,\n    \"bannedUsers\": 0,\n    \"wrongDeviceAttempts\": 1,\n    \"expiringSoon\": 1,\n    \"expiredSubs\": 1,\n    \"loginsPerDay\": [\n      {\n        \"date\": \"2026-10-23\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-24\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-25\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-26\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-27\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-28\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-29\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-30\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-10-31\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-01\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-02\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-03\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-04\",\n        \"count\": 0\n      },\n      {\n        \"date\": \"2026-11-05\",\n        \"count\": 3\n      }\n    ],\n    \"perGame\": [\n      {\n        \"gameId\": \"flying-bird\",\n        \"name\": \"flying-bird\",\n        \"active\": true,\n        \"users\": 4\n      },\n      {\n        \"gameId\": \"second-game\",\n        \"name\": \"second-game\",\n        \"active\": false,\n        \"users\": 0\n      }\n    ]\n  }\n}"
             }
           ]
         }
@@ -4674,7 +4674,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c97e\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.803Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:33.464Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:33.464Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:33.464Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:05:33.127Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2027-05-05T15:05:32.235Z\",\n      \"daysLeft\": 181\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.315Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652a\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_active\",\n    \"note\": \"Postman test\",\n    \"deviceId\": \"PC-TEST-0001\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.644Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:17.302Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:17.302Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:17.302Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": {\n      \"at\": \"2026-11-05T15:43:16.966Z\",\n      \"deviceId\": \"PC-TEST-0002\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2027-05-05T15:43:16.061Z\",\n      \"daysLeft\": 181\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.152Z\"\n  }\n}"
             }
           ]
         },
@@ -4774,7 +4774,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c980\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_expired\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n      \"endsAt\": \"2026-12-05T15:05:32.235Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.379Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f0652c\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_expired\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2026-12-05T15:43:16.061Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.216Z\"\n  }\n}"
             }
           ]
         },
@@ -4858,7 +4858,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:05:33.677Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:05:32.235Z\",\n    \"endsAt\": \"2026-12-05T15:05:32.235Z\",\n    \"daysLeft\": 30\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.518Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2026-12-05T15:43:16.061Z\",\n    \"daysLeft\": 30\n  }\n}"
             }
           ]
         },
@@ -4957,7 +4957,7 @@
                   "value": "application/json; charset=utf-8"
                 }
               ],
-              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aec9b3cf1a01c7de771c986\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3ogocr_agency\",\n    \"note\": \"Agency - never expires\",\n    \"deviceId\": \"PC-TEST-0003\",\n    \"deviceBoundAt\": \"2026-11-05T15:05:32.866Z\",\n    \"lastLoginAt\": \"2026-11-05T15:05:32.866Z\",\n    \"lastSeenAt\": \"2026-11-05T15:05:32.866Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:05:32.866Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"not_started\",\n      \"startsAt\": \"2026-11-15T15:05:32.235Z\",\n      \"endsAt\": \"2027-01-15T15:05:32.235Z\",\n      \"daysLeft\": 71\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:05:32.565Z\"\n  }\n}"
+              "body": "{\n  \"ok\": true,\n  \"message\": \"subscription saved\",\n  \"user\": {\n    \"id\": \"6aeca414405fa996b3f06532\",\n    \"type\": \"agency\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw3pt74t_agency\",\n    \"note\": \"Agency - never expires\",\n    \"deviceId\": \"PC-TEST-0003\",\n    \"deviceBoundAt\": \"2026-11-05T15:43:16.711Z\",\n    \"lastLoginAt\": \"2026-11-05T15:43:16.711Z\",\n    \"lastSeenAt\": \"2026-11-05T15:43:16.711Z\",\n    \"sessionExpiresAt\": \"2026-12-05T15:43:16.711Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"not_started\",\n      \"startsAt\": \"2026-11-15T15:43:16.061Z\",\n      \"endsAt\": \"2027-01-15T15:43:16.061Z\",\n      \"daysLeft\": 71\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:16.406Z\"\n  }\n}"
             }
           ]
         },
@@ -5352,7 +5352,1814 @@
       ]
     },
     {
-      "name": "7. Cleanup",
+      "name": "7. Admin - Games  [NEW]",
+      "description": "Games are managed from the dashboard (stored in the database). `GAMES` in `.env` is only a seed: games listed there are added once if missing.\n\n- `gameId` never changes (it is on every account and the game sends it). Only `name` (display) can be edited.\n- **Disabled** game: login, /session and /play return `403 GAME_DISABLED` immediately for all its accounts; enabling it brings everything back.\n- **Delete** works only when the game has no accounts (`409 GAME_HAS_USERS` otherwise: disable it instead).",
+      "item": [
+        {
+          "name": "7.1 List games -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games"
+              ]
+            },
+            "description": "`games: [{ gameId, name, active, users, createdAt }]`. `users` = number of accounts on that game."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newGameId', pm.collectionVariables.get('runId') + '-game');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('has flying-bird', () => pm.expect(pm.response.json().games.map(g => g.gameId)).to.include(pm.collectionVariables.get('gameId')));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"games\": [\n    {\n      \"gameId\": \"flying-bird\",\n      \"name\": \"flying-bird\",\n      \"active\": true,\n      \"users\": 6,\n      \"createdAt\": \"2026-11-05T15:43:04.041Z\"\n    },\n    {\n      \"gameId\": \"second-game\",\n      \"name\": \"second-game\",\n      \"active\": false,\n      \"users\": 0,\n      \"createdAt\": \"2026-11-05T15:43:04.042Z\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.2 Add a game -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games"
+              ]
+            },
+            "description": "`gameId`: 2-40 chars, lowercase letters, numbers, `-`. `name`: 1-60 chars. Works right away, no redeploy.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"name\": \"Postman Test Game\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('game.active = true', () => pm.expect(pm.response.json().game.active).to.eql(true));",
+                  "pm.test('game.name = \"Postman Test Game\"', () => pm.expect(pm.response.json().game.name).to.eql(\"Postman Test Game\"));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"name\": \"Postman Test Game\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"game created\",\n  \"game\": {\n    \"gameId\": \"tmw3pt74t-game\",\n    \"name\": \"Postman Test Game\",\n    \"active\": true,\n    \"users\": 0,\n    \"createdAt\": \"2026-11-05T15:43:17.595Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.3 Bad gameId -> 400 INVALID_INPUT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"Bad Game!\",\n  \"name\": \"Bad\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_INPUT', () => pm.expect(pm.response.json().code).to.eql('INVALID_INPUT'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request INVALID_INPUT",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"Bad Game!\",\n  \"name\": \"Bad\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"INVALID_INPUT\",\n  \"message\": \"gameId must be 2-40 chars: lowercase letters, numbers, - (not starting with -)\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.4 gameId already exists -> 409 GAME_EXISTS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"name\": \"Again\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "pm.test('code = GAME_EXISTS', () => pm.expect(pm.response.json().code).to.eql('GAME_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "409 Conflict GAME_EXISTS",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"name\": \"Again\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_EXISTS\",\n  \"message\": \"a game with this gameId already exists\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.5 Account on the new game -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('gameUserId', pm.response.json().user.id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeca415405fa996b3f06595\",\n    \"type\": \"streamer\",\n    \"gameId\": \"tmw3pt74t-game\",\n    \"username\": \"tmw3pt74t_gamer\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n      \"endsAt\": \"2026-12-05T15:43:16.061Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-05T15:43:17.687Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.6 Login on the new game -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('gameToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.753Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2026-12-05T15:43:16.061Z\",\n    \"daysLeft\": 30\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.7 Rename -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{newGameId}}"
+              ]
+            },
+            "description": "Only the display name changes; the gameId stays the same.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Postman Test Game (renamed)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('game.name = \"Postman Test Game (renamed)\"', () => pm.expect(pm.response.json().game.name).to.eql(\"Postman Test Game (renamed)\"));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{newGameId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Postman Test Game (renamed)\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"game saved\",\n  \"game\": {\n    \"gameId\": \"tmw3pt74t-game\",\n    \"name\": \"Postman Test Game (renamed)\",\n    \"active\": true,\n    \"users\": 1,\n    \"createdAt\": \"2026-11-05T15:43:17.595Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.8 Disable -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{newGameId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('game.active = false', () => pm.expect(pm.response.json().game.active).to.eql(false));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{newGameId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"game disabled\",\n  \"game\": {\n    \"gameId\": \"tmw3pt74t-game\",\n    \"name\": \"Postman Test Game (renamed)\",\n    \"active\": false,\n    \"users\": 1,\n    \"createdAt\": \"2026-11-05T15:43:17.595Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.9 Session on a disabled game -> 403 GAME_DISABLED",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{gameToken}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{gameDeviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            },
+            "description": "Players already logged in are stopped immediately. The game shows: \"this game is currently unavailable\"."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));",
+                  "pm.test('code = GAME_DISABLED', () => pm.expect(pm.response.json().code).to.eql('GAME_DISABLED'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "403 Forbidden GAME_DISABLED",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{gameToken}}"
+                  },
+                  {
+                    "key": "X-Device-Id",
+                    "value": "{{gameDeviceId}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "session"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_DISABLED\",\n  \"message\": \"this game is disabled\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.10 Play on a disabled game -> 403 GAME_DISABLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{gameToken}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{gameDeviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/play",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "play"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));",
+                  "pm.test('code = GAME_DISABLED', () => pm.expect(pm.response.json().code).to.eql('GAME_DISABLED'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "403 Forbidden GAME_DISABLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{gameToken}}"
+                  },
+                  {
+                    "key": "X-Device-Id",
+                    "value": "{{gameDeviceId}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/play",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "play"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_DISABLED\",\n  \"message\": \"this game is disabled\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.11 Login on a disabled game -> 403 GAME_DISABLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "Checked after the password (a wrong password still gives WRONG_CREDENTIALS).",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', () => pm.response.to.have.status(403));",
+                  "pm.test('code = GAME_DISABLED', () => pm.expect(pm.response.json().code).to.eql('GAME_DISABLED'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "403 Forbidden GAME_DISABLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_DISABLED\",\n  \"message\": \"this game is disabled\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.12 New account on a disabled game -> 400 GAME_DISABLED",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer2\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = GAME_DISABLED', () => pm.expect(pm.response.json().code).to.eql('GAME_DISABLED'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request GAME_DISABLED",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer2\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_DISABLED\",\n  \"message\": \"this game is disabled: enable it first\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.13 Enable -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{newGameId}}"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('game.active = true', () => pm.expect(pm.response.json().game.active).to.eql(true));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{newGameId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"game enabled\",\n  \"game\": {\n    \"gameId\": \"tmw3pt74t-game\",\n    \"name\": \"Postman Test Game (renamed)\",\n    \"active\": true,\n    \"users\": 1,\n    \"createdAt\": \"2026-11-05T15:43:17.595Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.14 Session after enabling -> 200 (same token)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{gameToken}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{gameDeviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            },
+            "description": "Disabling does not end sessions: the same token works again."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{gameToken}}"
+                  },
+                  {
+                    "key": "X-Device-Id",
+                    "value": "{{gameDeviceId}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "session"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw3pt74t_gamer\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T15:43:17.753Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-05T15:43:16.061Z\",\n    \"endsAt\": \"2026-12-05T15:43:16.061Z\",\n    \"daysLeft\": 30\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.15 Delete a game that has accounts -> 409 GAME_HAS_USERS",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{newGameId}}"
+              ]
+            },
+            "description": "`users` = how many accounts it still has. Disable it instead, or delete its accounts first."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "pm.test('code = GAME_HAS_USERS', () => pm.expect(pm.response.json().code).to.eql('GAME_HAS_USERS'));",
+                  "pm.test('users = 1', () => pm.expect(pm.response.json().users).to.eql(1));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "409 Conflict GAME_HAS_USERS",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{newGameId}}"
+                  ]
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"GAME_HAS_USERS\",\n  \"message\": \"this game still has accounts: disable it instead, or delete its accounts first\",\n  \"users\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.16 Delete its account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{gameUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{gameUserId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/{{gameUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "{{gameUserId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account deleted\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.17 Delete the game (no accounts) -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{newGameId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{newGameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{newGameId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"game deleted\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.18 Login on a deleted game -> 400 UNKNOWN_GAME",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = UNKNOWN_GAME', () => pm.expect(pm.response.json().code).to.eql('UNKNOWN_GAME'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request UNKNOWN_GAME",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{newGameId}}\",\n  \"username\": \"{{runId}}_gamer\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{gameDeviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"UNKNOWN_GAME\",\n  \"message\": \"unknown gameId\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.19 Edit a game that does not exist -> 404 NOT_FOUND",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/no-such-game",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "no-such-game"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+                  "pm.test('code = NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "404 Not Found NOT_FOUND",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/no-such-game",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "no-such-game"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"x\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"NOT_FOUND\",\n  \"message\": \"game not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.20 Edit with nothing to change -> 400 INVALID_INPUT",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/{{gameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "{{gameId}}"
+              ]
+            },
+            "description": "Send `name` and/or `active` (true / false).",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_INPUT', () => pm.expect(pm.response.json().code).to.eql('INVALID_INPUT'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request INVALID_INPUT",
+              "originalRequest": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/{{gameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "{{gameId}}"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"INVALID_INPUT\",\n  \"message\": \"send name and/or active\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "7.21 Delete a game that does not exist -> 404 NOT_FOUND",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/games/no-such-game",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "games",
+                "no-such-game"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+                  "pm.test('code = NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "404 Not Found NOT_FOUND",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/games/no-such-game",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "games",
+                    "no-such-game"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"NOT_FOUND\",\n  \"message\": \"game not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Cleanup",
       "description": "Deletes the test accounts made by this run.",
       "item": [
         {
@@ -5850,6 +7657,22 @@
     {
       "key": "agencySubId",
       "value": ""
+    },
+    {
+      "key": "newGameId",
+      "value": ""
+    },
+    {
+      "key": "gameUserId",
+      "value": ""
+    },
+    {
+      "key": "gameToken",
+      "value": ""
+    },
+    {
+      "key": "gameDeviceId",
+      "value": "PC-TEST-0004"
     },
     {
       "key": "activeEndsAt",

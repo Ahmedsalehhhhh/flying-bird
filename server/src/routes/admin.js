@@ -5,11 +5,15 @@ const User = require("../models/User");
 const LoginEvent = require("../models/LoginEvent");
 const config = require("../config");
 const requireAdmin = require("../middleware/requireAdmin");
+const Game = require("../models/Game");
+const games = require("../games");
 const { createLimiter } = require("../middleware/rateLimit");
 const { signAdminToken, safeEqual } = require("../tokens");
 const {
   validateUsername,
   validatePassword,
+  validateGameId,
+  validateGameName,
   validateMonths,
   parseDate,
   subscriptionInfo,
@@ -144,9 +148,84 @@ async function update(req, res, changes, message) {
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/games
+// Games
 // ---------------------------------------------------------------------------
-router.get("/games", (_req, res) => res.json({ ok: true, games: [...config.games] }));
+const toAdminGame = (g, users = 0) => ({
+  gameId: g.gameId,
+  name: g.name,
+  active: !!g.active,
+  users,
+  createdAt: g.createdAt,
+});
+
+async function userCountsByGame() {
+  const rows = await User.aggregate([{ $group: { _id: "$gameId", n: { $sum: 1 } } }]);
+  return new Map(rows.map((r) => [r._id, r.n]));
+}
+
+// GET /api/admin/games  -> [{ gameId, name, active, users, createdAt }]
+router.get("/games", handle(async (_req, res) => {
+  const counts = await userCountsByGame();
+  res.json({ ok: true, games: games.list().map((g) => toAdminGame(g, counts.get(g.gameId) || 0)) });
+}));
+
+// POST /api/admin/games  { gameId, name }
+router.post("/games", handle(async (req, res) => {
+  const gameId = String((req.body && req.body.gameId) || "").toLowerCase().trim();
+  const name = req.body && req.body.name;
+  const err = validateGameId(gameId) || validateGameName(name);
+  if (err) return fail(res, 400, "INVALID_INPUT", err);
+  try {
+    const game = await Game.create({ gameId, name: name.trim(), active: true });
+    await games.refresh();
+    res.status(201).json({ ok: true, message: "game created", game: toAdminGame(game) });
+  } catch (e) {
+    if (e.code === 11000) return fail(res, 409, "GAME_EXISTS", "a game with this gameId already exists");
+    throw e;
+  }
+}));
+
+// PATCH /api/admin/games/:gameId  { name?, active? }   (gameId itself never changes)
+router.patch("/games/:gameId", handle(async (req, res) => {
+  const changes = {};
+  const body = req.body || {};
+  if (body.name !== undefined) {
+    const err = validateGameName(body.name);
+    if (err) return fail(res, 400, "INVALID_INPUT", err);
+    changes.name = body.name.trim();
+  }
+  if (body.active !== undefined) {
+    if (typeof body.active !== "boolean") return fail(res, 400, "INVALID_INPUT", "active must be true or false");
+    changes.active = body.active;
+  }
+  if (!Object.keys(changes).length) return fail(res, 400, "INVALID_INPUT", "send name and/or active");
+
+  const game = await Game.findOneAndUpdate({ gameId: String(req.params.gameId).toLowerCase() }, { $set: changes }, { new: true });
+  if (!game) return fail(res, 404, "NOT_FOUND", "game not found");
+  await games.refresh();
+  const users = await User.countDocuments({ gameId: game.gameId });
+  const message = changes.active === false ? "game disabled" : changes.active === true ? "game enabled" : "game saved";
+  res.json({ ok: true, message, game: toAdminGame(game, users) });
+}));
+
+// DELETE /api/admin/games/:gameId   -> only when it has no accounts (otherwise disable it)
+router.delete("/games/:gameId", handle(async (req, res) => {
+  const gameId = String(req.params.gameId).toLowerCase();
+  const game = await Game.findOne({ gameId });
+  if (!game) return fail(res, 404, "NOT_FOUND", "game not found");
+  const users = await User.countDocuments({ gameId });
+  if (users) {
+    return res.status(409).json({
+      ok: false,
+      code: "GAME_HAS_USERS",
+      message: "this game still has accounts: disable it instead, or delete its accounts first",
+      users,
+    });
+  }
+  await Game.deleteOne({ _id: game._id });
+  await games.refresh();
+  res.json({ ok: true, message: "game deleted" });
+}));
 
 // ---------------------------------------------------------------------------
 // GET /api/admin/stats?gameId=&type=streamer|agency
@@ -176,9 +255,9 @@ router.get("/stats", handle(async (req, res) => {
   );
   const loginsPerDay = days.map((d, i) => ({ date: dayKey(d), count: counts[i] }));
 
-  const games = [...config.games];
-  const perGameCounts = await Promise.all(games.map((g) => User.countDocuments({ ...userTypeFilter(req), gameId: g })));
-  const perGame = games.map((g, i) => ({ gameId: g, users: perGameCounts[i] }));
+  const allGames = games.list();
+  const perGameCounts = await Promise.all(allGames.map((g) => User.countDocuments({ ...userTypeFilter(req), gameId: g.gameId })));
+  const perGame = allGames.map((g, i) => ({ gameId: g.gameId, name: g.name, active: !!g.active, users: perGameCounts[i] }));
 
   res.json({
     ok: true,
@@ -232,7 +311,9 @@ router.post("/users", handle(async (req, res) => {
   const type = String((req.body && req.body.type) || "streamer").toLowerCase();
   if (!TYPES.includes(type)) return fail(res, 400, "INVALID_INPUT", "type must be streamer or agency");
   const gameId = String((req.body && req.body.gameId) || "").toLowerCase().trim();
-  if (!config.games.has(gameId)) return fail(res, 400, "UNKNOWN_GAME", "unknown gameId");
+  const gameState = games.isActive(gameId);
+  if (gameState === "unknown") return fail(res, 400, "UNKNOWN_GAME", "unknown gameId");
+  if (gameState === "disabled") return fail(res, 400, "GAME_DISABLED", "this game is disabled: enable it first");
   const err = validateUsername(username) || validatePassword(password);
   if (err) return fail(res, 400, "INVALID_INPUT", err);
 

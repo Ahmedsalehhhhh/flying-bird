@@ -4,6 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const config = require("./config");
+const games = require("./games");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 
@@ -29,7 +30,8 @@ app.set("trust proxy", 1);
 app.use(cors({ origin: config.corsOrigins.includes("*") ? true : config.corsOrigins }));
 app.use(express.json({ limit: "10kb" }));
 
-app.get("/health", (_req, res) => res.json({ ok: true, games: [...config.games] }));
+app.get("/health", (_req, res) =>
+  res.json({ ok: true, games: games.list().filter((g) => g.active).map((g) => g.gameId) }));
 app.use("/api/admin", adminRoutes);
 app.use("/api", authRoutes);
 
@@ -44,10 +46,11 @@ app.get("/admin", (_req, res) => {
 
 mongoose
   .connect(config.mongoUri, { dbName: config.dbName })
-  .then(() => {
+  .then(async () => {
     console.log("MongoDB connected");
+    await games.load(); // games from the database (+ GAMES from .env added once if missing)
     app.listen(config.port, () =>
-      console.log(`Auth server on port ${config.port} | games: ${[...config.games].join(", ")}`)
+      console.log(`Auth server on port ${config.port} | games: ${games.list().map((g) => g.gameId + (g.active ? "" : " (disabled)")).join(", ")}`)
     );
   })
   .catch((e) => {

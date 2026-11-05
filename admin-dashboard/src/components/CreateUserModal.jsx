@@ -24,7 +24,11 @@ async function copy(text) {
  * Admin creates an account (streamer or agency), then sees the username + password once to hand them over.
  */
 export default function CreateUserModal({ type = "streamer", title, notePlaceholder, games, defaultGame, onCreated, onClose }) {
-  const [gameId, setGameId] = useState(defaultGame || games[0] || "flying-bird");
+  // only games that are turned on can get new accounts
+  const activeGames = games.filter((g) => g.active);
+  const [gameId, setGameId] = useState(
+    (activeGames.some((g) => g.gameId === defaultGame) && defaultGame) || (activeGames[0] && activeGames[0].gameId) || ""
+  );
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState(randomPassword());
   const [note, setNote] = useState("");
@@ -50,6 +54,7 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
     !/^[a-zA-Z0-9_.-]{3,30}$/.test(username.trim()) ||
     password.length < 6 ||
     password.length > 72 ||
+    !gameId ||
     (subOn && !subStart);
 
   async function submit(e) {
@@ -104,14 +109,15 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
         <form className="modal" role="dialog" aria-modal="true" aria-labelledby="create-title" onSubmit={submit}>
           <h3 id="create-title">{title || "حساب جديد"}</h3>
 
-          {games.length > 1 && (
+          {activeGames.length > 1 && (
             <label className="field">
               <span>اللعبة</span>
               <select value={gameId} onChange={(e) => setGameId(e.target.value)}>
-                {games.map((g) => <option key={g} value={g}>{g}</option>)}
+                {activeGames.map((g) => <option key={g.gameId} value={g.gameId}>{g.name}</option>)}
               </select>
             </label>
           )}
+          {!activeGames.length && <p className="form-error">مفيش لعبة شغالة: ضيف لعبة أو شغّل واحدة الأول.</p>}
 
           <label className="field">
             <span>اليوزر</span>

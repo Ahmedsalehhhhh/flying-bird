@@ -23,7 +23,7 @@ The game uses three endpoints: `POST /login`, `GET /session` (every time the gam
 
 | Field | Rule |
 |---|---|
-| `gameId` | must be in `GAMES` in the server `.env` |
+| `gameId` | a game added in the dashboard (card "اللعب") |
 | `username`, `password` | the ones the admin gave the streamer |
 | `deviceId` | 8–64 chars: letters, numbers, `-`. Must be the same value every time on the same PC |
 
@@ -52,11 +52,12 @@ The game uses three endpoints: `POST /login`, `GET /session` (every time the gam
 
 | HTTP | code | Meaning |
 |---|---|---|
-| 400 | `UNKNOWN_GAME` | `gameId` not in `GAMES` |
+| 400 | `UNKNOWN_GAME` | no game with this `gameId` |
 | 400 | `INVALID_INPUT` | missing field / bad `deviceId` |
 | 401 | `WRONG_CREDENTIALS` | wrong username or password |
 | 403 | `WRONG_DEVICE` | account is locked to another device |
 | 403 | `BANNED` | banned by admin (`reason` included) |
+| 403 | `GAME_DISABLED` | the admin turned this game off (checked after the password) |
 | 403 | `NO_SUBSCRIPTION` | streamer has no subscription |
 | 403 | `SUBSCRIPTION_NOT_STARTED` | start date is in the future (`startsAt`, `endsAt` included) |
 | 403 | `SUBSCRIPTION_EXPIRED` | end date passed (`startsAt`, `endsAt` included) |
@@ -127,6 +128,7 @@ X-Device-Id: <the SAME deviceId sent in /login>
 | 401 | `DEVICE_MISMATCH` | `X-Device-Id` missing or not the login device | back to login |
 | 401 | `SESSION_ENDED` | a newer login happened, or admin changed password / banned / reset device / kicked | back to login |
 | 403 | `BANNED` | banned (`reason` included) | show "banned" |
+| 403 | `GAME_DISABLED` | the admin turned this game off (applies immediately to logged-in players) | show "this game is currently unavailable" |
 | 403 | `NO_SUBSCRIPTION` / `SUBSCRIPTION_NOT_STARTED` / `SUBSCRIPTION_EXPIRED` | subscription problem (`startsAt`, `endsAt` included) | show "subscription expired, contact the admin" |
 
 The subscription is checked on every request, so an account that expires while its token is still valid is stopped too.
@@ -139,6 +141,8 @@ Future endpoints (scores, etc.) use the same two headers.
 
 ## Admin (dashboard)
 
+**Games** are stored in the database and managed from the dashboard. `GAMES` in the server `.env` is only a seed: games listed there are added once if missing (a game disabled or deleted from the dashboard stays that way). A new game works right away, no redeploy.
+
 All admin requests except login need `Authorization: Bearer <adminToken>`.
 
 Accounts have a `type`: `streamer` or `agency`. It decides which dashboard tab they appear in, and agency accounts do not need a subscription. Otherwise `/login`, `/session` and `/play` work the same for both.
@@ -148,10 +152,13 @@ Accounts have a `type`: `streamer` or `agency`. It decides which dashboard tab t
 | Method | Path | Body / query | Does |
 |---|---|---|---|
 | POST | `/admin/login` | `{ password }` | returns `token` (ADMIN_PASSWORD from `.env`) |
-| GET | `/admin/games` | | list of games |
+| GET | `/admin/games` | | `games: [{ gameId, name, active, users, createdAt }]` (`users` = accounts on that game) |
+| POST | `/admin/games` | `{ gameId, name }` | add a game (`gameId` 2–40 chars: lowercase letters, numbers, `-`; never changes). `409 GAME_EXISTS` |
+| PATCH | `/admin/games/:gameId` | `{ name?, active? }` | rename (display only) / disable (`active: false`) / enable. `404 NOT_FOUND` |
+| DELETE | `/admin/games/:gameId` | | delete, only if it has no accounts (`409 GAME_HAS_USERS` + `users`: disable it instead) |
 | GET | `/admin/stats` | `?gameId=&type=` | totals, logins today, not bound, banned, wrong-device tries (7 days), `expiringSoon` (7 days), `expiredSubs`, logins per day (14 days) |
 | GET | `/admin/users` | `?type=&gameId=&search=&status=&page=&limit=` | list. `type` = `streamer` `agency`. `status` = `all` `bound` `unbound` `alerts` `banned` `expiring` (ends within 7 days) `expired` (ended, or streamer without a subscription). `search` = username or note |
-| POST | `/admin/users` | `{ type, gameId, username, password, note, startsAt, months }` | create an account. `type` = `streamer` (default) or `agency` (`409 USERNAME_TAKEN`). `startsAt` (ISO date) + `months` (1–12) required for streamers, optional for agency |
+| POST | `/admin/users` | `{ type, gameId, username, password, note, startsAt, months }` | create an account (`400 GAME_DISABLED` if the game is off). `type` = `streamer` (default) or `agency` (`409 USERNAME_TAKEN`). `startsAt` (ISO date) + `months` (1–12) required for streamers, optional for agency |
 | POST | `/admin/users/:id/subscription` | `{ startsAt, months }` | set / renew the subscription. If `startsAt` is inside the current period (e.g. its last day), the months are added on top and the old start is kept. Does not log the player out |
 | GET | `/admin/users/:id` | | account + last 20 login attempts |
 | PATCH | `/admin/users/:id` | `{ note }` | edit note |

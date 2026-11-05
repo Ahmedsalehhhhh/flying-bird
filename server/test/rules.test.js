@@ -13,6 +13,8 @@ const {
   applySubscription,
   sessionExpired,
   shouldExtendSession,
+  validateGameId,
+  validateGameName,
 } = require("../src/rules");
 
 const D = (s) => new Date(s);
@@ -143,4 +145,23 @@ test("session is extended at most once an hour", () => {
   assert.strictEqual(shouldExtendSession(at(MONTH - 30 * 60000), now, MONTH), false); // 30 min ago
   assert.strictEqual(shouldExtendSession(at(MONTH - 2 * 3600000), now, MONTH), true); // 2 hours ago
   assert.strictEqual(shouldExtendSession(at(10 * DAY), now, MONTH), true); // idle for 20 days
+});
+
+test("gameId validation", () => {
+  assert.strictEqual(validateGameId("flying-bird"), null);
+  assert.strictEqual(validateGameId("game2"), null);
+  assert.ok(validateGameId("a"));
+  assert.ok(validateGameId("-bird"));
+  assert.ok(validateGameId("Flying-Bird")); // lowercase only
+  assert.ok(validateGameId("flying bird"));
+  assert.ok(validateGameId("x".repeat(41)));
+  assert.ok(validateGameId(undefined));
+});
+
+test("game name validation", () => {
+  assert.strictEqual(validateGameName("Flying Bird"), null);
+  assert.strictEqual(validateGameName("الطائر"), null);
+  assert.ok(validateGameName("   "));
+  assert.ok(validateGameName("x".repeat(61)));
+  assert.ok(validateGameName(undefined));
 });

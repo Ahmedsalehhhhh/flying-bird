@@ -184,6 +184,8 @@ h1 { font-size: 18px; font-weight: 700; }
 .per-game-head { display: flex; justify-content: space-between; margin-bottom: 6px; }
 .meter { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
 .meter span { display: block; height: 100%; background: var(--accent); border-radius: 4px; }
+.game-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.game-badge { margin-inline-start: 6px; font-size: 11px; }
 
 /* ---------- users table ---------- */
 .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
