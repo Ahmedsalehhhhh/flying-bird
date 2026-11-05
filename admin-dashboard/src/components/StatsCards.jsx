@@ -5,6 +5,8 @@ export default function StatsCards({ stats }) {
     { key: "totalUsers", label: "إجمالي الحسابات" },
     { key: "loggedInToday", label: "دخلوا النهارده", dot: "good" },
     { key: "notBound", label: "لسه ماربطوش جهاز" },
+    { key: "expiringSoon", label: "اشتراكات قربت تخلص (7 أيام)", dot: "warning" },
+    { key: "expiredSubs", label: "اشتراكات خلصت", dot: "critical" },
     { key: "wrongDeviceAttempts", label: "محاولات من جهاز تاني (7 أيام)", dot: "warning" },
     { key: "bannedUsers", label: "محظورين", dot: "critical" },
   ];

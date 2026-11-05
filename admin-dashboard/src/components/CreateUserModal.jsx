@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, errorText } from "../api.js";
+import { fromInputDate, toInputDate, formatDate } from "../format.js";
+import SubscriptionFields from "./SubscriptionFields.jsx";
 
 // Random readable password (no 0/O/1/l confusion)
 function randomPassword(len = 10) {
@@ -26,6 +28,10 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState(randomPassword());
   const [note, setNote] = useState("");
+  // Streamers must have a subscription; agency accounts never expire unless the admin sets one.
+  const subRequired = type === "streamer";
+  const [subOn, setSubOn] = useState(subRequired);
+  const [sub, setSub] = useState({ start: toInputDate(new Date()), months: 3 });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [created, setCreated] = useState(null);
@@ -39,7 +45,12 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
     return () => window.removeEventListener("keydown", onKey);
   }, [busy, onClose, created]);
 
-  const invalid = !/^[a-zA-Z0-9_.-]{3,30}$/.test(username.trim()) || password.length < 6 || password.length > 72;
+  const subStart = fromInputDate(sub.start);
+  const invalid =
+    !/^[a-zA-Z0-9_.-]{3,30}$/.test(username.trim()) ||
+    password.length < 6 ||
+    password.length > 72 ||
+    (subOn && !subStart);
 
   async function submit(e) {
     e.preventDefault();
@@ -47,7 +58,14 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
     setBusy(true);
     setError("");
     try {
-      const res = await api.createUser({ type, gameId, username: username.trim(), password, note: note.trim() });
+      const res = await api.createUser({
+        type,
+        gameId,
+        username: username.trim(),
+        password,
+        note: note.trim(),
+        ...(subOn ? { startsAt: subStart.toISOString(), months: sub.months } : {}),
+      });
       setCreated({ ...res.user, password });
       onCreated(res.user);
     } catch (err) {
@@ -66,6 +84,11 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
           <p className="muted">ابعت البيانات دي لصاحب الحساب. الباسورد مش هيظهر تاني بعد ما تقفل.</p>
           <pre className="creds" dir="ltr">{credsText}</pre>
           <p className="muted small">الحساب هيتقفل على أول جهاز يدخل منه.</p>
+          {created.subscription && created.subscription.endsAt && (
+            <p className="muted small">
+              الاشتراك من {formatDate(created.subscription.startsAt)} لحد {formatDate(created.subscription.endsAt)}.
+            </p>
+          )}
           <div className="modal-actions">
             <button
               ref={firstRef}
@@ -107,6 +130,14 @@ export default function CreateUserModal({ type = "streamer", title, notePlacehol
             </div>
             <small className="muted">6 حروف على الأقل</small>
           </label>
+
+          <SubscriptionFields
+            value={sub}
+            onChange={setSub}
+            optional={!subRequired}
+            enabled={subOn}
+            onToggle={setSubOn}
+          />
 
           <label className="field">
             <span>ملاحظة (اختياري)</span>

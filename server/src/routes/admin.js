@@ -7,7 +7,14 @@ const config = require("../config");
 const requireAdmin = require("../middleware/requireAdmin");
 const { createLimiter } = require("../middleware/rateLimit");
 const { signAdminToken, safeEqual } = require("../tokens");
-const { validateUsername, validatePassword } = require("../rules");
+const {
+  validateUsername,
+  validatePassword,
+  validateMonths,
+  parseDate,
+  subscriptionInfo,
+  applySubscription,
+} = require("../rules");
 
 const router = express.Router();
 
@@ -64,8 +71,11 @@ function toAdminUser(u) {
     deviceId: u.deviceId || null,
     deviceBoundAt: u.deviceBoundAt || null,
     lastLoginAt: u.lastLoginAt || null,
+    lastSeenAt: u.lastSeenAt || null,
+    sessionExpiresAt: u.sessionExpiresAt || null,
     lastLoginIp: u.lastLoginIp || "",
     wrongDevice: u.lastRejectedDeviceAt ? { at: u.lastRejectedDeviceAt, deviceId: u.lastRejectedDeviceId } : null,
+    subscription: subscriptionInfo(u),
     banned: !!u.banned,
     banReason: u.banReason || "",
     bannedAt: u.bannedAt || null,
@@ -95,6 +105,25 @@ function eventTypeFilter(req) {
   if (t === "agency") return { accountType: "agency" };
   if (t === "streamer") return { accountType: { $ne: "agency" } };
   return {};
+}
+
+// Accounts that cannot play because of the subscription:
+// end date passed, or a streamer that never got one (agency accounts without dates never expire).
+const expiredFilter = (now) => ({
+  $or: [{ subscriptionEndsAt: { $lte: now } }, { subscriptionEndsAt: null, type: { $ne: "agency" } }],
+});
+const EXPIRING_DAYS = 7;
+const expiringFilter = (now) => ({
+  subscriptionEndsAt: { $gt: now, $lte: new Date(now.getTime() + EXPIRING_DAYS * DAY) },
+});
+
+// { startsAt, months } from the request body -> { startsAt: Date, months } or an error message.
+function readSubscription(body) {
+  const startsAt = parseDate(body && body.startsAt);
+  const months = Number(body && body.months);
+  if (!startsAt) return { error: "startsAt must be a valid date" };
+  if (!validateMonths(months)) return { error: "months must be a whole number 1-12" };
+  return { startsAt, months };
 }
 
 async function findUserOr404(req, res) {
@@ -129,12 +158,14 @@ router.get("/stats", handle(async (req, res) => {
   const today = startOfDay(now);
   const weekAgo = new Date(today.getTime() - 6 * DAY);
 
-  const [totalUsers, loggedInToday, notBound, bannedUsers, wrongDeviceAttempts] = await Promise.all([
+  const [totalUsers, loggedInToday, notBound, bannedUsers, wrongDeviceAttempts, expiringSoon, expiredSubs] = await Promise.all([
     User.countDocuments(base),
     User.countDocuments({ ...base, lastLoginAt: { $gte: today } }),
     User.countDocuments({ ...base, deviceId: null }),
     User.countDocuments({ ...base, banned: true }),
     LoginEvent.countDocuments({ ...eventBase, code: "WRONG_DEVICE", at: { $gte: weekAgo } }),
+    User.countDocuments({ ...base, ...expiringFilter(now) }),
+    User.countDocuments({ ...base, ...expiredFilter(now) }),
   ]);
 
   // Successful logins per day, last 14 days (oldest first)
@@ -151,12 +182,12 @@ router.get("/stats", handle(async (req, res) => {
 
   res.json({
     ok: true,
-    stats: { totalUsers, loggedInToday, notBound, bannedUsers, wrongDeviceAttempts, loginsPerDay, perGame },
+    stats: { totalUsers, loggedInToday, notBound, bannedUsers, wrongDeviceAttempts, expiringSoon, expiredSubs, loginsPerDay, perGame },
   });
 }));
 
 // ---------------------------------------------------------------------------
-// GET /api/admin/users?type=streamer|agency&gameId=&search=&status=all|bound|unbound|banned|alerts&page=&limit=
+// GET /api/admin/users?type=streamer|agency&gameId=&search=&status=all|bound|unbound|banned|alerts|expired|expiring&page=&limit=
 // ---------------------------------------------------------------------------
 router.get("/users", handle(async (req, res) => {
   const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -173,6 +204,8 @@ router.get("/users", handle(async (req, res) => {
   if (status === "unbound") filter.deviceId = null;
   if (status === "banned") filter.banned = true;
   if (status === "alerts") filter.lastRejectedDeviceAt = { $ne: null };
+  if (status === "expired") filter.$and = [expiredFilter(new Date())];
+  if (status === "expiring") Object.assign(filter, expiringFilter(new Date()));
 
   const [total, users] = await Promise.all([
     User.countDocuments(filter),
@@ -190,7 +223,9 @@ router.get("/users", handle(async (req, res) => {
 }));
 
 // ---------------------------------------------------------------------------
-// POST /api/admin/users  { type, gameId, username, password, note }  -> create an account (type: streamer | agency)
+// POST /api/admin/users  { type, gameId, username, password, note, startsAt, months }
+//   -> create an account (type: streamer | agency)
+//   startsAt (ISO date) + months (1-12): required for streamers, optional for agency accounts.
 // ---------------------------------------------------------------------------
 router.post("/users", handle(async (req, res) => {
   const { username, password, note } = req.body || {};
@@ -201,6 +236,14 @@ router.post("/users", handle(async (req, res) => {
   const err = validateUsername(username) || validatePassword(password);
   if (err) return fail(res, 400, "INVALID_INPUT", err);
 
+  let subscription = {};
+  const hasSub = req.body.startsAt != null || req.body.months != null;
+  if (type === "streamer" || hasSub) {
+    const s = readSubscription(req.body);
+    if (s.error) return fail(res, 400, "INVALID_INPUT", s.error);
+    subscription = applySubscription(null, s.startsAt, s.months);
+  }
+
   try {
     const user = await User.create({
       type,
@@ -208,6 +251,7 @@ router.post("/users", handle(async (req, res) => {
       username: username.trim(),
       password: await bcrypt.hash(password, 10),
       note: String(note || "").slice(0, 200),
+      ...subscription,
     });
     res.status(201).json({ ok: true, message: "account created", user: toAdminUser(user) });
   } catch (e) {
@@ -262,6 +306,17 @@ router.post("/users/:id/password", handle(async (req, res) => {
   const err = validatePassword(newPassword);
   if (err) return fail(res, 400, "INVALID_INPUT", err);
   return update(req, res, { $set: { password: await bcrypt.hash(newPassword, 10) }, $inc: { tokenVersion: 1 } }, "password changed");
+}));
+
+// POST /api/admin/users/:id/subscription  { startsAt, months }
+//   Set / renew the subscription. If startsAt is inside the current period (e.g. its last day),
+//   the months are added on top of the remaining days. Does not log the player out.
+router.post("/users/:id/subscription", handle(async (req, res) => {
+  const s = readSubscription(req.body);
+  if (s.error) return fail(res, 400, "INVALID_INPUT", s.error);
+  const user = await findUserOr404(req, res);
+  if (!user) return;
+  return update(req, res, { $set: applySubscription(user, s.startsAt, s.months) }, "subscription saved");
 }));
 
 // POST /api/admin/users/:id/clear-alert  -> hide the "wrong device" alert

@@ -130,7 +130,7 @@ h1 { font-size: 18px; font-weight: 700; }
 /* ---------- stat tiles ---------- */
 .stats {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 12px;
 }
 @media (max-width: 1100px) { .stats { grid-template-columns: repeat(3, 1fr); } }
@@ -331,6 +331,11 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px v
 .device { font-family: ui-monospace, Consolas, monospace; font-size: 12px; background: var(--surface-2); padding: 2px 6px; border-radius: 6px; }
 .input-row { display: flex; gap: 8px; }
 .input-row input { flex: 1; }
+.input-row > .field { flex: 1; }
+.sub-preview { margin: 0; }
+.checkbox-row { display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer; }
+.checkbox-row span { font-weight: 600; }
+.sub-cell { display: flex; flex-direction: column; gap: 2px; align-items: flex-start; }
 .creds { font-family: ui-monospace, Consolas, monospace; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin: 12px 0; text-align: left; white-space: pre-wrap; user-select: all; }
 
 /* ---------- section tabs (streamers / agency) ---------- */

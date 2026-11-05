@@ -2,7 +2,9 @@
 
 Base URL: `https://<server>/api` (local: `http://localhost:3000/api`). Everything is JSON.
 
-The game uses two endpoints: `POST /login` then `POST /play`. Accounts are created by the admin from the dashboard (there is no register).
+The game uses three endpoints: `POST /login`, `GET /session` (every time the game opens) and `POST /play`. Accounts are created by the admin from the dashboard (there is no register).
+
+**Subscriptions:** every streamer account has a start date and an end date set by the admin (1–12 months). Outside those dates the account cannot log in or play. Agency accounts never expire unless the admin gives them a subscription.
 
 ---
 
@@ -38,11 +40,13 @@ The game uses two endpoints: `POST /login` then `POST /play`. Accounts are creat
 {
   "ok": true,
   "message": "login successful",
-  "token": "eyJhbGciOi..."
+  "token": "eyJhbGciOi...",
+  "session": { "expiresAt": "2026-12-05T14:00:00.000Z" },
+  "subscription": { "startsAt": "2026-11-01T00:00:00.000Z", "endsAt": "2027-02-01T00:00:00.000Z", "daysLeft": 88 }
 }
 ```
 
-`ok: true` = logged in.
+`ok: true` = logged in. `subscription` is `null` for accounts that never expire.
 
 **Errors** — always `{ "ok": false, "code": "...", "message": "..." }`
 
@@ -53,12 +57,46 @@ The game uses two endpoints: `POST /login` then `POST /play`. Accounts are creat
 | 401 | `WRONG_CREDENTIALS` | wrong username or password |
 | 403 | `WRONG_DEVICE` | account is locked to another device |
 | 403 | `BANNED` | banned by admin (`reason` included) |
+| 403 | `NO_SUBSCRIPTION` | streamer has no subscription |
+| 403 | `SUBSCRIPTION_NOT_STARTED` | start date is in the future (`startsAt`, `endsAt` included) |
+| 403 | `SUBSCRIPTION_EXPIRED` | end date passed (`startsAt`, `endsAt` included) |
 | 429 | `TOO_MANY_ATTEMPTS` | too many wrong passwords (`retryAfterSec` included) |
 | 500 | `SERVER_ERROR` | |
 
-Keep the `token` in memory (no need to save it to a file). It is needed for `/play`.
+The subscription is checked **before** the device lock, so an expired account never locks a device.
+
+Save the `token` (and the `deviceId`): the game sends them to `/session` every time it opens, and to `/play`.
 
 Every login gives a **new** token and the previous token stops working (`SESSION_ENDED`). Only the newest token is valid.
+
+**Session length:** the session lasts **30 days** (`SESSION_DAYS`) from the **last** valid `/session` or `/play` call, and every valid call pushes it 30 days forward again automatically. The token itself does not change, so keep using the same saved token. A streamer who opens the game at least once a month never has to log in again. After 30 days without opening the game, the next call returns `401 TOKEN_EXPIRED` and the streamer logs in again.
+
+---
+
+## Session check (the game)
+
+### `GET /api/session`
+
+Call it **every time the game opens**, with the saved token. No body, same headers as `/play`:
+
+```
+Authorization: Bearer <token from /login>
+X-Device-Id: <the SAME deviceId sent in /login>
+```
+
+**200 OK** → the session is valid, continue to the main menu
+
+```json
+{
+  "ok": true,
+  "message": "session valid",
+  "user": { "username": "streamer1", "type": "streamer" },
+  "session": { "expiresAt": "..." },
+  "subscription": { "startsAt": "...", "endsAt": "...", "daysLeft": 88 }
+}
+```
+
+Errors are the same as `/play` (table below). No saved token, or any 401 → show the login screen.
 
 ---
 
@@ -76,7 +114,7 @@ X-Device-Id: <the SAME deviceId sent in /login>
 **200 OK** → start the game
 
 ```json
-{ "ok": true, "message": "ok to play" }
+{ "ok": true, "message": "ok to play", "session": { "expiresAt": "..." }, "subscription": { "startsAt": "...", "endsAt": "...", "daysLeft": 88 } }
 ```
 
 **Errors**
@@ -84,11 +122,14 @@ X-Device-Id: <the SAME deviceId sent in /login>
 | HTTP | code | Meaning | Game does |
 |---|---|---|---|
 | 401 | `NO_TOKEN` | no Authorization header | back to login |
-| 401 | `TOKEN_EXPIRED` | token older than `TOKEN_HOURS` (24h) | back to login |
+| 401 | `TOKEN_EXPIRED` | no valid request for 30 days (`SESSION_DAYS`) | back to login |
 | 401 | `TOKEN_INVALID` | bad token / account deleted | back to login |
 | 401 | `DEVICE_MISMATCH` | `X-Device-Id` missing or not the login device | back to login |
 | 401 | `SESSION_ENDED` | a newer login happened, or admin changed password / banned / reset device / kicked | back to login |
 | 403 | `BANNED` | banned (`reason` included) | show "banned" |
+| 403 | `NO_SUBSCRIPTION` / `SUBSCRIPTION_NOT_STARTED` / `SUBSCRIPTION_EXPIRED` | subscription problem (`startsAt`, `endsAt` included) | show "subscription expired, contact the admin" |
+
+The subscription is checked on every request, so an account that expires while its token is still valid is stopped too.
 
 Any 401 = call `/login` again (the player re-enters username + password).
 
@@ -100,15 +141,18 @@ Future endpoints (scores, etc.) use the same two headers.
 
 All admin requests except login need `Authorization: Bearer <adminToken>`.
 
-Accounts have a `type`: `streamer` or `agency`. It only decides which dashboard tab they appear in; `/login` and `/play` work the same for both.
+Accounts have a `type`: `streamer` or `agency`. It decides which dashboard tab they appear in, and agency accounts do not need a subscription. Otherwise `/login`, `/session` and `/play` work the same for both.
+
+`subscription.status` = `active` | `expired` | `not_started` | `none` (streamer without one) | `unlimited` (agency without one).
 
 | Method | Path | Body / query | Does |
 |---|---|---|---|
 | POST | `/admin/login` | `{ password }` | returns `token` (ADMIN_PASSWORD from `.env`) |
 | GET | `/admin/games` | | list of games |
-| GET | `/admin/stats` | `?gameId=&type=` | totals, logins today, not bound, banned, wrong-device tries (7 days), logins per day (14 days) |
-| GET | `/admin/users` | `?type=&gameId=&search=&status=&page=&limit=` | list. `type` = `streamer` `agency`. `status` = `all` `bound` `unbound` `alerts` `banned`. `search` = username or note |
-| POST | `/admin/users` | `{ type, gameId, username, password, note }` | create an account. `type` = `streamer` (default) or `agency` (`409 USERNAME_TAKEN`) |
+| GET | `/admin/stats` | `?gameId=&type=` | totals, logins today, not bound, banned, wrong-device tries (7 days), `expiringSoon` (7 days), `expiredSubs`, logins per day (14 days) |
+| GET | `/admin/users` | `?type=&gameId=&search=&status=&page=&limit=` | list. `type` = `streamer` `agency`. `status` = `all` `bound` `unbound` `alerts` `banned` `expiring` (ends within 7 days) `expired` (ended, or streamer without a subscription). `search` = username or note |
+| POST | `/admin/users` | `{ type, gameId, username, password, note, startsAt, months }` | create an account. `type` = `streamer` (default) or `agency` (`409 USERNAME_TAKEN`). `startsAt` (ISO date) + `months` (1–12) required for streamers, optional for agency |
+| POST | `/admin/users/:id/subscription` | `{ startsAt, months }` | set / renew the subscription. If `startsAt` is inside the current period (e.g. its last day), the months are added on top and the old start is kept. Does not log the player out |
 | GET | `/admin/users/:id` | | account + last 20 login attempts |
 | PATCH | `/admin/users/:id` | `{ note }` | edit note |
 | POST | `/admin/users/:id/reset-device` | | unlock device (next login locks again) |
@@ -125,8 +169,9 @@ User object returned to admin:
 {
   "id": "...", "type": "streamer", "gameId": "flying-bird", "username": "streamer1", "note": "Ahmed - Twitch",
   "deviceId": "A1B2C3D4E5F6A7B8", "deviceBoundAt": "...",
-  "lastLoginAt": "...", "lastLoginIp": "...",
+  "lastLoginAt": "...", "lastLoginIp": "...", "lastSeenAt": "...", "sessionExpiresAt": "...",
   "wrongDevice": { "at": "...", "deviceId": "OTHER-PC" },
+  "subscription": { "status": "active", "startsAt": "...", "endsAt": "...", "daysLeft": 88 },
   "banned": false, "banReason": "", "bannedAt": null, "createdAt": "..."
 }
 ```

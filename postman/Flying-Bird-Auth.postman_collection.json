@@ -73,10 +73,10 @@
             "users"
           ]
         },
-        "description": "Admin makes the account and gives username + password to the streamer. Saves userId.",
+        "description": "Admin makes the account and gives username + password to the streamer. Saves userId.\n\nStreamers need a subscription: startsAt (ISO date) + months (1-12). Agency accounts: optional.",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"note\": \"Ahmed - Twitch\"\n}",
+          "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"note\": \"Ahmed - Twitch\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 3\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -85,6 +85,15 @@
         }
       },
       "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('today', new Date().toISOString());"
+            ]
+          }
+        },
         {
           "listen": "test",
           "script": {
@@ -139,6 +148,44 @@
               "  pm.collectionVariables.set('token', pm.response.json().token);",
               "  console.log('token saved');",
               "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3a. Session check (every time the game opens) -> OK",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "{{deviceId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/session",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "session"
+          ]
+        },
+        "description": "The game calls this every time it opens with the saved token. Checks token, device, ban and subscription."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+              "pm.test('has subscription', () => pm.expect(pm.response.json().subscription).to.have.property('daysLeft'));"
             ]
           }
         }
@@ -1092,6 +1139,242 @@
       ]
     },
     {
+      "name": "20a. Admin: make the subscription expired (2 months ago, 1 month)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/users/{{userId}}/subscription",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "{{userId}}",
+            "subscription"
+          ]
+        },
+        "description": "Start date before the current period -> replaces it. The account is now expired.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"startsAt\": \"{{twoMonthsAgo}}\",\n  \"months\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const d = new Date(); d.setMonth(d.getMonth() - 2); pm.collectionVariables.set('twoMonthsAgo', d.toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+              "pm.test('expired', () => pm.expect(pm.response.json().user.subscription.status).to.eql('expired'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20b. Session check while expired -> SUBSCRIPTION_EXPIRED",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "{{deviceId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/session",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "session"
+          ]
+        },
+        "description": "The token is still valid, but the subscription ended: the game must show 'subscription expired'."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+              "pm.test('code SUBSCRIPTION_EXPIRED', () => pm.expect(pm.response.json().code).to.eql('SUBSCRIPTION_EXPIRED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20c. Login while expired -> SUBSCRIPTION_EXPIRED",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        },
+        "description": "",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{username}}\",\n  \"password\": \"{{newPassword}}\",\n  \"deviceId\": \"{{deviceId2}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 403', () => pm.expect(pm.response.code).to.be.oneOf([403]));",
+              "pm.test('code SUBSCRIPTION_EXPIRED', () => pm.expect(pm.response.json().code).to.eql('SUBSCRIPTION_EXPIRED'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20d. Admin: renew from today, 3 months",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{adminToken}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/admin/users/{{userId}}/subscription",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "users",
+            "{{userId}}",
+            "subscription"
+          ]
+        },
+        "description": "startsAt + months (1-12). If startsAt is inside the current period (e.g. its last day), the months are added on top of the remaining days and the start date is kept.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"startsAt\": \"{{today}}\",\n  \"months\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('today', new Date().toISOString());"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));",
+              "pm.test('active', () => pm.expect(pm.response.json().user.subscription.status).to.eql('active'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "20e. Session check after renewing -> OK",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "{{deviceId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/session",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "session"
+          ]
+        },
+        "description": ""
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('status 200', () => pm.expect(pm.response.code).to.be.oneOf([200]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
       "name": "21. Admin: delete account",
       "request": {
         "method": "DELETE",
@@ -1174,6 +1457,14 @@
     },
     {
       "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "today",
+      "value": ""
+    },
+    {
+      "key": "twoMonthsAgo",
       "value": ""
     }
   ]

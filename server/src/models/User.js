@@ -17,12 +17,21 @@ const userSchema = new mongoose.Schema(
     // Bumped to invalidate all tokens (reset device, ban, new password, kick).
     tokenVersion: { type: Number, default: 0 },
 
+    // Player session: ends at sessionExpiresAt; every valid game request pushes it SESSION_DAYS forward.
+    sessionExpiresAt: { type: Date, default: null },
+    lastSeenAt: { type: Date, default: null }, // last valid request from the game
+
     lastLoginAt: { type: Date, default: null },
     lastLoginIp: { type: String, default: "" },
 
     // Last time someone tried this account from ANOTHER device (shown as an alert).
     lastRejectedDeviceAt: { type: Date, default: null },
     lastRejectedDeviceId: { type: String, default: null },
+
+    // Subscription: streamers can only log in between these dates (set by the admin).
+    // Agency accounts without dates never expire.
+    subscriptionStartsAt: { type: Date, default: null },
+    subscriptionEndsAt: { type: Date, default: null },
 
     banned: { type: Boolean, default: false },
     banReason: { type: String, default: "" },
@@ -35,5 +44,6 @@ const userSchema = new mongoose.Schema(
 userSchema.index({ gameId: 1, username: 1 }, { unique: true });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ type: 1, createdAt: -1 });
+userSchema.index({ subscriptionEndsAt: 1 });
 
 module.exports = mongoose.model("User", userSchema);

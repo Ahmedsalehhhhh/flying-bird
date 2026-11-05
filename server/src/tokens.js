@@ -9,12 +9,13 @@ const deviceHash = (deviceId) => sha256("device:" + deviceId).slice(0, 32);
 
 // ---------- Player token (returned by /login) ----------
 // Bound to the device (dh) and to the account's tokenVersion (tv),
-// so reset-device / ban / new password / kick make old tokens useless.
+// so a newer login / reset-device / ban / new password / kick make old tokens useless.
+// No "exp": how long it lasts is decided by user.sessionExpiresAt in the database (sliding, SESSION_DAYS).
 function signPlayerToken(user, deviceId) {
   return jwt.sign(
     { sub: String(user._id), game: user.gameId, name: user.username, dh: deviceHash(deviceId), tv: user.tokenVersion || 0 },
     config.jwtSecret,
-    { expiresIn: config.tokenTtlSec, audience: "player" }
+    { audience: "player" }
   );
 }
 

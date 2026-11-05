@@ -100,6 +100,7 @@ export const api = {
   kick: (id) => request("POST", `/admin/users/${id}/kick`, {}),
   ban: (id, reason) => request("POST", `/admin/users/${id}/ban`, { reason }),
   unban: (id) => request("POST", `/admin/users/${id}/unban`, {}),
+  setSubscription: (id, startsAt, months) => request("POST", `/admin/users/${id}/subscription`, { startsAt, months }),
   setPassword: (id, newPassword) => request("POST", `/admin/users/${id}/password`, { newPassword }),
   remove: (id) => request("DELETE", `/admin/users/${id}`),
   clearAlert: (id) => request("POST", `/admin/users/${id}/clear-alert`, {}),
@@ -116,6 +117,9 @@ const MESSAGES = {
   USERNAME_TAKEN: "اليوزر ده موجود قبل كده",
   UNKNOWN_GAME: "اللعبة دي مش متضافة في GAMES في السيرفر",
   SERVER_ERROR: "حصل خطأ في السيرفر",
+  NO_SUBSCRIPTION: "الحساب مالوش اشتراك",
+  SUBSCRIPTION_NOT_STARTED: "الاشتراك لسه مابدأش",
+  SUBSCRIPTION_EXPIRED: "الاشتراك خلص",
 };
 
 export function errorText(err) {

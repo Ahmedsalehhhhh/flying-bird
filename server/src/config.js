@@ -15,7 +15,10 @@ module.exports = {
 
   // Token returned by /login (for future game requests)
   jwtSecret: (process.env.JWT_SECRET || "").trim(),
-  tokenTtlSec: num(process.env.TOKEN_HOURS, 24) * 3600,
+
+  // Player session: ends after SESSION_DAYS without any valid request from the game.
+  // Every valid request (/session, /play, ...) pushes the end date SESSION_DAYS forward.
+  sessionMs: num(process.env.SESSION_DAYS, 30) * 86400000,
 
   // Brute-force protection for /login
   loginMaxAttempts: num(process.env.LOGIN_MAX_ATTEMPTS, 5),

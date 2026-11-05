@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Flying Bird - Unreal (Login + Play)",
-    "description": "For the game developer: 1) Login  2) Play. Change baseUrl to the live server if needed.",
+    "name": "Flying Bird - Unreal (Login + Session + Play)",
+    "description": "For the game developer: 1) Login  2) Session check every time the game opens  3) Play. Change baseUrl to the live server if needed.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -33,7 +33,7 @@
             }
           }
         },
-        "description": "The only endpoint the game needs.\n\n- Send username + password (given by the admin) + a deviceId unique to this PC (8-64 chars: letters, numbers, -). Use the SAME deviceId every time on the same PC.\n- First successful login locks the account to that deviceId. Another PC gets 403 WRONG_DEVICE.\n- ok: true = allowed to play. Call it on game start (and whenever you want to re-check).\n- Any error body: { ok: false, code, message }. Show the player a message based on `code`.\n- token: keep it for future endpoints (not needed now).\n\nSee the saved Examples (right side) for every possible response."
+        "description": "The only endpoint the game needs.\n\n- Send username + password (given by the admin) + a deviceId unique to this PC (8-64 chars: letters, numbers, -). Use the SAME deviceId every time on the same PC.\n- First successful login locks the account to that deviceId. Another PC gets 403 WRONG_DEVICE.\n- ok: true = allowed to play. Call it on game start (and whenever you want to re-check).\n- Any error body: { ok: false, code, message }. Show the player a message based on `code`.\n- token: keep it for future endpoints (not needed now).\n\nSee the saved Examples (right side) for every possible response.\n\nsubscription: { startsAt, endsAt, daysLeft } (null = never expires). Show daysLeft to the streamer if you want.\n403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> show \"subscription expired, contact the admin\".\n\nSession: lasts 30 days and every /session or /play call pushes it 30 days forward. Keep the SAME token; it does not change."
       },
       "response": [
         {
@@ -74,7 +74,7 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOi...\"\n}"
+          "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOi...\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T14:00:00.000Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-01T00:00:00.000Z\",\n    \"endsAt\": \"2027-02-01T00:00:00.000Z\",\n    \"daysLeft\": 88\n  }\n}"
         },
         {
           "name": "401 WRONG_CREDENTIALS",
@@ -275,6 +275,99 @@
             }
           ],
           "body": "{\n  \"ok\": false,\n  \"code\": \"TOO_MANY_ATTEMPTS\",\n  \"message\": \"too many attempts, try again in 840s\",\n  \"retryAfterSec\": 840\n}"
+        },
+        {
+          "name": "403 NO_SUBSCRIPTION",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"NO_SUBSCRIPTION\",\n  \"message\": \"this account has no subscription\",\n  \"startsAt\": null,\n  \"endsAt\": null\n}"
+        },
+        {
+          "name": "403 SUBSCRIPTION_NOT_STARTED",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_NOT_STARTED\",\n  \"message\": \"subscription has not started yet\",\n  \"startsAt\": \"2026-12-01T00:00:00.000Z\",\n  \"endsAt\": \"2027-03-01T00:00:00.000Z\"\n}"
+        },
+        {
+          "name": "403 SUBSCRIPTION_EXPIRED",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-08-01T00:00:00.000Z\",\n  \"endsAt\": \"2026-11-01T00:00:00.000Z\"\n}"
         }
       ],
       "event": [
@@ -290,7 +383,210 @@
       ]
     },
     {
-      "name": "2. Play",
+      "name": "2. Session check (every time the game opens)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "X-Device-Id",
+            "value": "{{deviceId}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/session",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "session"
+          ]
+        },
+        "description": "Call this EVERY time the game opens (and before showing the main menu) with the saved token.\n\nHeaders:\n- Authorization: Bearer <token from Login>\n- X-Device-Id: <the SAME deviceId sent in Login>\n\nok: true -> session is valid, continue.\nAny 401 (NO_TOKEN, TOKEN_EXPIRED, TOKEN_INVALID, DEVICE_MISMATCH, SESSION_ENDED) -> go back to the login screen.\n403 BANNED -> show \"account banned\" (+ reason).\n403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> show \"subscription expired, contact the admin\".\n\nEvery valid call pushes the session 30 days forward (session.expiresAt). Keep using the same token."
+      },
+      "response": [
+        {
+          "name": "200 OK",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{deviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"streamer1\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T14:00:00.000Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-01T00:00:00.000Z\",\n    \"endsAt\": \"2027-02-01T00:00:00.000Z\",\n    \"daysLeft\": 88\n  }\n}"
+        },
+        {
+          "name": "403 NO_SUBSCRIPTION",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{deviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"NO_SUBSCRIPTION\",\n  \"message\": \"this account has no subscription\",\n  \"startsAt\": null,\n  \"endsAt\": null\n}"
+        },
+        {
+          "name": "403 SUBSCRIPTION_NOT_STARTED",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{deviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_NOT_STARTED\",\n  \"message\": \"subscription has not started yet\",\n  \"startsAt\": \"2026-12-01T00:00:00.000Z\",\n  \"endsAt\": \"2027-03-01T00:00:00.000Z\"\n}"
+        },
+        {
+          "name": "403 SUBSCRIPTION_EXPIRED",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{deviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"SUBSCRIPTION_EXPIRED\",\n  \"message\": \"subscription expired\",\n  \"startsAt\": \"2026-08-01T00:00:00.000Z\",\n  \"endsAt\": \"2026-11-01T00:00:00.000Z\"\n}"
+        },
+        {
+          "name": "401 SESSION_ENDED",
+          "originalRequest": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{deviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"ok\": false,\n  \"code\": \"SESSION_ENDED\",\n  \"message\": \"please log in again\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "3. Play",
       "request": {
         "method": "POST",
         "header": [
@@ -316,7 +612,7 @@
             "play"
           ]
         },
-        "description": "Call when the streamer presses PLAY / START. No body.\n\nHeaders:\n- Authorization: Bearer <token from Login>\n- X-Device-Id: <the SAME deviceId sent in Login>\n\nok: true -> start the game.\nAny 401 (NO_TOKEN, TOKEN_EXPIRED, TOKEN_INVALID, DEVICE_MISMATCH, SESSION_ENDED) -> go back to the login screen (call Login again).\n403 BANNED -> show \"account banned\" (+ reason).\n\nThe token ends when: a NEWER login happens (only the newest token works), it expires (24h), or the admin bans / changes password / resets the device / deletes the account."
+        "description": "Call when the streamer presses PLAY / START. No body.\n\nHeaders:\n- Authorization: Bearer <token from Login>\n- X-Device-Id: <the SAME deviceId sent in Login>\n\nok: true -> start the game.\nAny 401 (NO_TOKEN, TOKEN_EXPIRED, TOKEN_INVALID, DEVICE_MISMATCH, SESSION_ENDED) -> go back to the login screen (call Login again).\n403 BANNED -> show \"account banned\" (+ reason).\n\nThe token ends when: a NEWER login happens (only the newest token works), 30 days pass without any /session or /play call, or the admin bans / changes password / resets the device / deletes the account.\n403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> show \"subscription expired, contact the admin\"."
       },
       "response": [
         {
@@ -356,7 +652,7 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\"\n}"
+          "body": "{\n  \"ok\": true,\n  \"message\": \"ok to play\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-05T14:00:00.000Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-01T00:00:00.000Z\",\n    \"endsAt\": \"2027-02-01T00:00:00.000Z\",\n    \"daysLeft\": 88\n  }\n}"
         },
         {
           "name": "401 DEVICE_MISMATCH (other PC)",
@@ -398,7 +694,7 @@
           "body": "{\n  \"ok\": false,\n  \"code\": \"DEVICE_MISMATCH\",\n  \"message\": \"token used from another device\"\n}"
         },
         {
-          "name": "401 TOKEN_EXPIRED",
+          "name": "401 TOKEN_EXPIRED (30 days without opening the game)",
           "originalRequest": {
             "method": "POST",
             "header": [
@@ -434,7 +730,7 @@
               "value": "application/json"
             }
           ],
-          "body": "{\n  \"ok\": false,\n  \"code\": \"TOKEN_EXPIRED\",\n  \"message\": \"token expired, call /login again\"\n}"
+          "body": "{\n  \"ok\": false,\n  \"code\": \"TOKEN_EXPIRED\",\n  \"message\": \"session expired, log in again\"\n}"
         },
         {
           "name": "401 SESSION_ENDED",

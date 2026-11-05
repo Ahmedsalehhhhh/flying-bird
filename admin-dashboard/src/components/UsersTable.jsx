@@ -3,11 +3,14 @@ import { api, errorText } from "../api.js";
 import { formatDate, formatDateTime, formatNumber, timeAgo } from "../format.js";
 import Modal from "./Modal.jsx";
 import CreateUserModal from "./CreateUserModal.jsx";
+import SubscriptionModal from "./SubscriptionModal.jsx";
 import { SECTIONS } from "../sections.js";
 
 const TABS = [
   { key: "all", label: "الكل" },
   { key: "unbound", label: "ماربطش جهاز" },
+  { key: "expiring", label: "الاشتراك قرب يخلص" },
+  { key: "expired", label: "الاشتراك خلص" },
   { key: "alerts", label: "محاولات من جهاز تاني" },
   { key: "banned", label: "محظورين" },
 ];
@@ -24,6 +27,7 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
   const [error, setError] = useState("");
   const [modal, setModal] = useState(null);
   const [creating, setCreating] = useState(false);
+  const [subFor, setSubFor] = useState(null);
 
   // Debounce search typing
   useEffect(() => {
@@ -161,7 +165,8 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
               <th>اللعبة</th>
               <th>الجهاز</th>
               <th>الحالة</th>
-              <th>آخر دخول</th>
+              <th>الاشتراك</th>
+              <th>آخر نشاط</th>
               <th>اتعمل</th>
               <th className="actions-col">إجراءات</th>
             </tr>
@@ -170,13 +175,13 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
             {!data &&
               [0, 1, 2].map((i) => (
                 <tr key={i}>
-                  <td colSpan={7}><div className="skeleton" style={{ height: 20 }} /></td>
+                  <td colSpan={8}><div className="skeleton" style={{ height: 20 }} /></td>
                 </tr>
               ))}
 
             {data && users.length === 0 && (
               <tr>
-                <td colSpan={7} className="empty">مفيش حسابات</td>
+                <td colSpan={8} className="empty">مفيش حسابات</td>
               </tr>
             )}
 
@@ -208,9 +213,13 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
                     )}
                   </div>
                 </td>
-                <td title={formatDateTime(u.lastLoginAt)}>{u.lastLoginAt ? timeAgo(u.lastLoginAt) : "—"}</td>
+                <td><SubscriptionCell sub={u.subscription} /></td>
+                <td title={activityTitle(u)}>{u.lastSeenAt || u.lastLoginAt ? timeAgo(u.lastSeenAt || u.lastLoginAt) : "—"}</td>
                 <td>{formatDate(u.createdAt)}</td>
                 <td className="actions">
+                  <button className="btn btn-small" onClick={() => setSubFor(u)}>
+                    {u.subscription && u.subscription.endsAt ? "تجديد الاشتراك" : "اشتراك"}
+                  </button>
                   <button className="btn btn-small" disabled={!u.deviceId} onClick={() => open.resetDevice(u)}
                     title={u.deviceId ? "" : "مش مربوط بجهاز"}>
                     فك ربط الجهاز
@@ -239,6 +248,14 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
       )}
 
       {modal && <Modal {...modal} onClose={() => setModal(null)} />}
+      {subFor && (
+        <SubscriptionModal
+          user={subFor}
+          onConfirm={(startsAt, months) =>
+            act(() => api.setSubscription(subFor.id, startsAt, months), `تم حفظ اشتراك ${subFor.username}`)()}
+          onClose={() => setSubFor(null)}
+        />
+      )}
       {creating && (
         <CreateUserModal
           type={type}
@@ -276,4 +293,57 @@ function StatusBadge({ user }) {
       <span className="dot dot-muted" aria-hidden="true" /> مستني أول دخول
     </span>
   );
+}
+
+const SOON_DAYS = 7;
+
+function SubscriptionCell({ sub }) {
+  if (!sub || sub.status === "unlimited") return <span className="muted">من غير انتهاء</span>;
+  if (sub.status === "none")
+    return (
+      <span className="badge badge-critical">
+        <span className="dot dot-critical" aria-hidden="true" /> مالوش اشتراك
+      </span>
+    );
+
+  let badge;
+  if (sub.status === "expired")
+    badge = (
+      <span className="badge badge-critical">
+        <span className="dot dot-critical" aria-hidden="true" /> خلص
+      </span>
+    );
+  else if (sub.status === "not_started")
+    badge = (
+      <span className="badge">
+        <span className="dot dot-muted" aria-hidden="true" /> يبدأ {formatDate(sub.startsAt)}
+      </span>
+    );
+  else {
+    const soon = sub.daysLeft <= SOON_DAYS;
+    badge = (
+      <span className={`badge ${soon ? "badge-warning" : "badge-good"}`}>
+        <span className={`dot ${soon ? "dot-warning" : "dot-good"}`} aria-hidden="true" /> فاضل {formatNumber(sub.daysLeft)} يوم
+      </span>
+    );
+  }
+
+  return (
+    <div className="sub-cell" title={`من ${formatDateTime(sub.startsAt)}\nلحد ${formatDateTime(sub.endsAt)}`}>
+      {badge}
+      <span className="muted small">لحد {formatDate(sub.endsAt)}</span>
+    </div>
+  );
+}
+
+// Tooltip for the "last activity" column: last login + when the session ends.
+function activityTitle(u) {
+  const lines = [];
+  if (u.lastSeenAt) lines.push(`آخر نشاط: ${formatDateTime(u.lastSeenAt)}`);
+  if (u.lastLoginAt) lines.push(`آخر لوجين: ${formatDateTime(u.lastLoginAt)}`);
+  if (u.sessionExpiresAt) {
+    const ended = new Date(u.sessionExpiresAt) <= new Date();
+    lines.push(`${ended ? "السيشن خلصت" : "السيشن بتخلص"}: ${formatDateTime(u.sessionExpiresAt)}`);
+  }
+  return lines.join("\n");
 }
