@@ -39,6 +39,15 @@ npm start
 1. ضيف اسم اللعبة في `GAMES` في ملف `.env`.
 2. اللعبة الجديدة تبعت اسمها في `gameId`.
 
+## الرفع على Hostinger
+
+- **Root directory:** فاضي (أول الـ repo)
+- **Entry file:** `server.js`
+- **Output directory / Build command:** فاضيين
+- **Node.js:** 20 أو 22
+
+`npm install` في أول الـ repo بيسطّب dependencies السيرفر لوحده (`postinstall`)، و `server.js` بيشغّل `server/src/index.js`. الإعدادات (`MONGO_URI` و `JWT_SECRET` ...) بتتحط في Environment variables على Hostinger.
+
 ## الداش بورد
 
 السيرفر نفسه بيعرض الداش بورد على `/admin`:
