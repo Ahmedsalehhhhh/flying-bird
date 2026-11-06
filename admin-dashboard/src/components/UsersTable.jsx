@@ -112,6 +112,13 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
         confirmText: "تمت المراجعة",
         onConfirm: act(() => api.clearAlert(u.id), "تم إخفاء التنبيه"),
       }),
+    clearBuildAlert: (u) =>
+      setModal({
+        title: `نسخة لعبة مش معروفة: ${u.username}`,
+        message: `في ${formatDateTime(u.suspiciousBuild.at)} الحساب لعب بنسخة لعبة مش مسجلة كـ "رسمية" (${u.suspiciousBuild.hash === "(none)" ? "من غير hash خالص" : u.suspiciousBuild.hash.slice(0, 16) + "…"}). لو ده إصدار جديد لسه ماسجلتوش، سجّله في كارت "النسخ المعتمدة". لو مش متأكد، ده ممكن يبقى نسخة متعدّل فيها.`,
+        confirmText: "تمت المراجعة",
+        onConfirm: act(() => api.clearBuildAlert(u.id), "تم إخفاء التنبيه"),
+      }),
     remove: (u) =>
       setModal({
         title: `حذف ${u.username}`,
@@ -209,6 +216,12 @@ export default function UsersTable({ type = "streamer", gameId, games = [], tick
                       <button className="badge badge-warning badge-btn" onClick={() => open.clearAlert(u)}
                         title={formatDateTime(u.wrongDevice.at)}>
                         <span className="dot dot-warning" aria-hidden="true" /> جهاز تاني حاول
+                      </button>
+                    )}
+                    {u.suspiciousBuild && (
+                      <button className="badge badge-warning badge-btn" onClick={() => open.clearBuildAlert(u)}
+                        title={formatDateTime(u.suspiciousBuild.at)}>
+                        <span className="dot dot-warning" aria-hidden="true" /> نسخة مش معروفة
                       </button>
                     )}
                   </div>

@@ -8,6 +8,7 @@ const { validateDeviceId, deviceDecision, subscriptionStatus, canPlay, SUB_ERROR
 const { signPlayerToken } = require("../tokens");
 const requireAuth = require("../middleware/requireAuth");
 const games = require("../games");
+const builds = require("../builds");
 
 const router = express.Router();
 
@@ -52,7 +53,8 @@ function logAttempt(req, { user, username, ok, code, deviceId }) {
 //   The session lasts SESSION_DAYS (30) and every /session or /play call pushes it forward again.
 //
 //   200 { ok: true, message, token, session: { expiresAt }, subscription: { startsAt, endsAt, daysLeft } | null }
-//   401 WRONG_CREDENTIALS  | 403 WRONG_DEVICE | 403 BANNED | 403 GAME_DISABLED | 429 TOO_MANY_ATTEMPTS
+//   401 WRONG_CREDENTIALS  | 403 WRONG_DEVICE | 403 BANNED | 403 GAME_DISABLED | 403 BUILD_MISMATCH* | 429 TOO_MANY_ATTEMPTS
+//   (*BUILD_MISMATCH only once the admin turns on ENFORCE_BUILD_CHECK; off by default)
 //   403 NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.post("/login", handle(async (req, res) => {
@@ -83,6 +85,20 @@ router.post("/login", handle(async (req, res) => {
     return fail(res, 401, "WRONG_CREDENTIALS", "invalid username or password");
   }
   userLimiter.reset(userKey);
+
+  // Build integrity check (see builds.js). Soft (log-only) unless ENFORCE_BUILD_CHECK=true.
+  const buildHeader = String(req.headers["x-build-hash"] || "").toLowerCase();
+  const buildStatus = builds.check(gameId, buildHeader);
+  if (buildStatus !== "ok") {
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { lastSuspiciousBuildAt: new Date(), lastSuspiciousBuildHash: buildHeader || "(none)" } }
+    );
+    if (config.enforceBuildCheck) {
+      logAttempt(req, { user, username: uname, ok: false, code: "BUILD_MISMATCH", deviceId });
+      return fail(res, 403, "BUILD_MISMATCH", "unrecognized game build");
+    }
+  }
 
   // game turned off by the admin (checked after the password, so it does not reveal anything)
   if (gameState === "disabled") {
@@ -166,7 +182,7 @@ router.post("/login", handle(async (req, res) => {
 //   (token, device, ban, subscription, session). A valid call pushes the session SESSION_DAYS forward.
 //   200 { ok: true, message, user: { username, type }, session: { expiresAt }, subscription }  -> continue
 //   401 NO_TOKEN | TOKEN_EXPIRED (no activity for SESSION_DAYS) | TOKEN_INVALID | DEVICE_MISMATCH | SESSION_ENDED  -> back to login
-//   403 BANNED | GAME_DISABLED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
+//   403 BANNED | GAME_DISABLED | BUILD_MISMATCH* | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.get("/session", requireAuth, (req, res) => {
   res.json({
@@ -186,7 +202,7 @@ router.get("/session", requireAuth, (req, res) => {
 //   The game calls this when the streamer presses PLAY / START.
 //   200 { ok: true, message }  -> start the game
 //   401 NO_TOKEN | TOKEN_EXPIRED (no activity for SESSION_DAYS) | TOKEN_INVALID | DEVICE_MISMATCH | SESSION_ENDED  -> back to login
-//   403 BANNED | GAME_DISABLED | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
+//   403 BANNED | GAME_DISABLED | BUILD_MISMATCH* | NO_SUBSCRIPTION | SUBSCRIPTION_NOT_STARTED | SUBSCRIPTION_EXPIRED
 // ---------------------------------------------------------------------------
 router.post("/play", requireAuth, (req, res) => {
   res.json({ ok: true, message: "ok to play", session: sessionInfo(req.user), subscription: gameSubscription(req.user) });

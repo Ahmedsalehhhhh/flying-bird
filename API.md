@@ -6,6 +6,8 @@ The game uses three endpoints: `POST /login`, `GET /session` (every time the gam
 
 **Subscriptions:** every streamer account has a start date and an end date set by the admin (1–12 months). Outside those dates the account cannot log in or play. Agency accounts never expire unless the admin gives them a subscription.
 
+**Build integrity (optional, off by default):** the game can send `X-Build-Hash` (sha1 or sha256 hex of its own executable) on every request. The admin registers the official hash of each release in the dashboard ("نسخ ... المعتمدة" card). While `ENFORCE_BUILD_CHECK` is off (the default), an unrecognized or missing hash is only logged on the account (visible as an alert in the users table) — nothing is blocked. Once the admin has registered every live build and turns `ENFORCE_BUILD_CHECK=true` on, requests with an unrecognized hash get `403 BUILD_MISMATCH`.
+
 ---
 
 ## Login (the game)
@@ -58,6 +60,7 @@ The game uses three endpoints: `POST /login`, `GET /session` (every time the gam
 | 403 | `WRONG_DEVICE` | account is locked to another device |
 | 403 | `BANNED` | banned by admin (`reason` included) |
 | 403 | `GAME_DISABLED` | the admin turned this game off (checked after the password) |
+| 403 | `BUILD_MISMATCH` | unrecognized game build (only once the admin turns on `ENFORCE_BUILD_CHECK`; off by default) |
 | 403 | `NO_SUBSCRIPTION` | streamer has no subscription |
 | 403 | `SUBSCRIPTION_NOT_STARTED` | start date is in the future (`startsAt`, `endsAt` included) |
 | 403 | `SUBSCRIPTION_EXPIRED` | end date passed (`startsAt`, `endsAt` included) |
@@ -129,6 +132,7 @@ X-Device-Id: <the SAME deviceId sent in /login>
 | 401 | `SESSION_ENDED` | a newer login happened, or admin changed password / banned / reset device / kicked | back to login |
 | 403 | `BANNED` | banned (`reason` included) | show "banned" |
 | 403 | `GAME_DISABLED` | the admin turned this game off (applies immediately to logged-in players) | show "this game is currently unavailable" |
+| 403 | `BUILD_MISMATCH` | unrecognized game build (only once `ENFORCE_BUILD_CHECK` is on) | show "please update the game" |
 | 403 | `NO_SUBSCRIPTION` / `SUBSCRIPTION_NOT_STARTED` / `SUBSCRIPTION_EXPIRED` | subscription problem (`startsAt`, `endsAt` included) | show "subscription expired, contact the admin" |
 
 The subscription is checked on every request, so an account that expires while its token is still valid is stopped too.
@@ -156,6 +160,10 @@ Accounts have a `type`: `streamer` or `agency`. It decides which dashboard tab t
 | POST | `/admin/games` | `{ gameId, name }` | add a game (`gameId` 2–40 chars: lowercase letters, numbers, `-`; never changes). `409 GAME_EXISTS` |
 | PATCH | `/admin/games/:gameId` | `{ name?, active? }` | rename (display only) / disable (`active: false`) / enable. `404 NOT_FOUND` |
 | DELETE | `/admin/games/:gameId` | | delete, only if it has no accounts (`409 GAME_HAS_USERS` + `users`: disable it instead) |
+| GET | `/admin/builds` | `?gameId=` | `{ enforced, builds: [{ _id, gameId, hash, label, createdAt }] }` — registered official build hashes |
+| POST | `/admin/builds` | `{ gameId, hash, label }` | register a release's hash (`hash`: 40 or 64 hex chars, sha1/sha256). `409 BUILD_EXISTS` |
+| DELETE | `/admin/builds/:id` | | revoke a hash (e.g. a leaked / outdated build) |
+| POST | `/admin/users/:id/clear-build-alert` | | hide the "unrecognized build" alert on an account |
 | GET | `/admin/stats` | `?gameId=&type=` | totals, logins today, not bound, banned, wrong-device tries (7 days), `expiringSoon` (7 days), `expiredSubs`, logins per day (14 days) |
 | GET | `/admin/users` | `?type=&gameId=&search=&status=&page=&limit=` | list. `type` = `streamer` `agency`. `status` = `all` `bound` `unbound` `alerts` `banned` `expiring` (ends within 7 days) `expired` (ended, or streamer without a subscription). `search` = username or note |
 | POST | `/admin/users` | `{ type, gameId, username, password, note, startsAt, months }` | create an account (`400 GAME_DISABLED` if the game is off). `type` = `streamer` (default) or `agency` (`409 USERNAME_TAKEN`). `startsAt` (ISO date) + `months` (1–12) required for streamers, optional for agency |
@@ -178,6 +186,7 @@ User object returned to admin:
   "deviceId": "A1B2C3D4E5F6A7B8", "deviceBoundAt": "...",
   "lastLoginAt": "...", "lastLoginIp": "...", "lastSeenAt": "...", "sessionExpiresAt": "...",
   "wrongDevice": { "at": "...", "deviceId": "OTHER-PC" },
+  "suspiciousBuild": { "at": "...", "hash": "a1b2c3..." },
   "subscription": { "status": "active", "startsAt": "...", "endsAt": "...", "daysLeft": 88 },
   "banned": false, "banReason": "", "bannedAt": null, "createdAt": "..."
 }

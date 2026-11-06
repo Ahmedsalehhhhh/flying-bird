@@ -1,7 +1,7 @@
 {
   "info": {
-    "name": "Flying Bird - Subscriptions + Session + Games (all cases)",
-    "description": "Every case of the new / changed requests: streamer subscriptions, the 30-day session and games managed from the dashboard.\n\n**How to use**\n1. Variables tab: set `adminPassword` (and `baseUrl` for the live server).\n2. Run collection (in order). It creates its own test accounts (prefixed with a random `runId`) and deletes them at the end.\n3. Requests marked **[reference]** are skipped when running; open their saved example to see the response.\n\nEvery request has a saved example with the real response.\n\n**Game rules**\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 GAME_DISABLED -> \"this game is currently unavailable\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
+    "name": "Flying Bird - Subscriptions + Session + Games + Builds (all cases)",
+    "description": "Every case of the new / changed requests: streamer subscriptions, the 30-day session games managed from the dashboard, and the optional build-integrity check.\n\n**How to use**\n1. Variables tab: set `adminPassword` (and `baseUrl` for the live server).\n2. Run collection (in order). It creates its own test accounts (prefixed with a random `runId`) and deletes them at the end.\n3. Requests marked **[reference]** are skipped when running; open their saved example to see the response.\n\nEvery request has a saved example with the real response.\n\n**Game rules**\n- any 401 -> login screen\n- 403 BANNED -> \"account banned\"\n- 403 GAME_DISABLED -> \"this game is currently unavailable\"\n- 403 NO_SUBSCRIPTION / SUBSCRIPTION_NOT_STARTED / SUBSCRIPTION_EXPIRED -> \"subscription ended, contact the admin\"",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -7159,7 +7159,1353 @@
       ]
     },
     {
-      "name": "8. Cleanup",
+      "name": "8. Admin - Build integrity  [NEW]",
+      "description": "Optional, off by default (`ENFORCE_BUILD_CHECK`). The game sends `X-Build-Hash` (sha1/sha256 of its own executable) on every request. The admin registers each official release's hash here.\n\n- **Soft mode (default):** an unrecognized or missing hash is only logged on the account (`suspiciousBuild`, shown as an alert in the dashboard). Nothing is blocked — this is what 8.6-8.10 show.\n- **Hard mode (`ENFORCE_BUILD_CHECK=true`):** the same mismatch gets `403 BUILD_MISMATCH` on /login, /session and /play (8.11, reference only here since it needs a different server flag).",
+      "item": [
+        {
+          "name": "8.1 List registered builds -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds?gameId={{gameId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ],
+              "query": [
+                {
+                  "key": "gameId",
+                  "value": "{{gameId}}"
+                }
+              ]
+            },
+            "description": "`enforced` says whether ENFORCE_BUILD_CHECK is on for the server right now. `builds` is the official hash list for this game."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds?gameId={{gameId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ],
+                  "query": [
+                    {
+                      "key": "gameId",
+                      "value": "{{gameId}}"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"enforced\": false,\n  \"builds\": []\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.2 Register an official build hash -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ]
+            },
+            "description": "`hash`: 40 (sha1) or 64 (sha256) hex chars — the game's own executable hash, computed at launch and sent back as `X-Build-Hash`. Register it right after you make an official release, before distributing it.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"v1.0.0 - test\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.test('build.label', () => pm.expect(pm.response.json().build.label).to.eql('v1.0.0 - test'));",
+                  "pm.collectionVariables.set('buildId', pm.response.json().build._id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"v1.0.0 - test\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"build registered\",\n  \"build\": {\n    \"gameId\": \"flying-bird\",\n    \"hash\": \"079e2e408a35ab75a077e6c8fa7fbe716b23ca5920c84ee654542db2c2693b34\",\n    \"label\": \"v1.0.0 - test\",\n    \"_id\": \"6aeddea3bf968ea611cc5a1c\",\n    \"createdAt\": \"2026-11-06T14:05:23.794Z\",\n    \"updatedAt\": \"2026-11-06T14:05:23.794Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.3 Same hash again -> 409 BUILD_EXISTS",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"duplicate\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 409', () => pm.response.to.have.status(409));",
+                  "pm.test('code = BUILD_EXISTS', () => pm.expect(pm.response.json().code).to.eql('BUILD_EXISTS'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "409 Conflict BUILD_EXISTS",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"duplicate\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Conflict",
+              "code": 409,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"BUILD_EXISTS\",\n  \"message\": \"this hash is already registered for this game\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.4 Not a valid hash -> 400 INVALID_INPUT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ]
+            },
+            "description": "Must be 40 or 64 hex chars (sha1/sha256). Anything else is rejected.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"not-a-hash\",\n  \"label\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = INVALID_INPUT', () => pm.expect(pm.response.json().code).to.eql('INVALID_INPUT'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request INVALID_INPUT",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"hash\": \"not-a-hash\",\n  \"label\": \"x\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"INVALID_INPUT\",\n  \"message\": \"hash must be a 40 or 64 char hex sha1/sha256 digest\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.5 Unknown game -> 400 UNKNOWN_GAME",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"no-such-game\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"x\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 400', () => pm.response.to.have.status(400));",
+                  "pm.test('code = UNKNOWN_GAME', () => pm.expect(pm.response.json().code).to.eql('UNKNOWN_GAME'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "400 Bad Request UNKNOWN_GAME",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"no-such-game\",\n  \"hash\": \"{{officialBuildHash}}\",\n  \"label\": \"x\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"UNKNOWN_GAME\",\n  \"message\": \"unknown gameId\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.6 Create a test streamer account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            },
+            "description": "Account used by 8.7-8.11 to exercise the build-hash check on /login and /session.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('buildUserId', pm.response.json().user.id);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "201 Created",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"streamer\",\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"startsAt\": \"{{today}}\",\n  \"months\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account created\",\n  \"user\": {\n    \"id\": \"6aeddea3bf968ea611cc5a21\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw51r57u_build\",\n    \"note\": \"\",\n    \"deviceId\": null,\n    \"deviceBoundAt\": null,\n    \"lastLoginAt\": null,\n    \"lastSeenAt\": null,\n    \"sessionExpiresAt\": null,\n    \"lastLoginIp\": \"\",\n    \"wrongDevice\": null,\n    \"suspiciousBuild\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n      \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-06T14:05:23.900Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.7 Login with the official hash -> 200, no alert",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Build-Hash",
+                "value": "{{officialBuildHash}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{buildDeviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('buildToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Build-Hash",
+                    "value": "{{officialBuildHash}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{buildDeviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-06T14:05:23.963Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n    \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n    \"daysLeft\": 30\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.8 Login again with an UNREGISTERED hash -> still 200 (soft mode), account flagged",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "X-Build-Hash",
+                "value": "{{wrongBuildHash}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "login"
+              ]
+            },
+            "description": "**Soft mode (ENFORCE_BUILD_CHECK off, the default): nothing is blocked.** The mismatch is only recorded on the account — see 8.9 — so the admin can review it without players being locked out. Still 200 here even though the hash is not the one registered in 8.2.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{buildDeviceId}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.collectionVariables.set('buildToken', pm.response.json().token);"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "X-Build-Hash",
+                    "value": "{{wrongBuildHash}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "login"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"gameId\": \"{{gameId}}\",\n  \"username\": \"{{runId}}_build\",\n  \"password\": \"{{password}}\",\n  \"deviceId\": \"{{buildDeviceId}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"login successful\",\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...(token)\",\n  \"session\": {\n    \"expiresAt\": \"2026-12-06T14:05:24.028Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n    \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n    \"daysLeft\": 30\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.9 Account now shows the alert -> suspiciousBuild",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{buildUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{buildUserId}}"
+              ]
+            },
+            "description": "`suspiciousBuild: { at, hash }` on the account, same idea as `wrongDevice`. The dashboard shows it as a \"نسخة مش معروفة\" badge in the users table."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('has suspiciousBuild', () => pm.expect(pm.response.json().user.suspiciousBuild).to.not.eql(null));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/{{buildUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "{{buildUserId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"user\": {\n    \"id\": \"6aeddea3bf968ea611cc5a21\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw51r57u_build\",\n    \"note\": \"\",\n    \"deviceId\": \"PC-TEST-0005\",\n    \"deviceBoundAt\": \"2026-11-06T14:05:23.963Z\",\n    \"lastLoginAt\": \"2026-11-06T14:05:24.028Z\",\n    \"lastSeenAt\": \"2026-11-06T14:05:24.028Z\",\n    \"sessionExpiresAt\": \"2026-12-06T14:05:24.028Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": null,\n    \"suspiciousBuild\": {\n      \"at\": \"2026-11-06T14:05:24.026Z\",\n      \"hash\": \"deadbeef00000000000000000000000000000000\"\n    },\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n      \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-06T14:05:23.900Z\"\n  },\n  \"logins\": [\n    {\n      \"at\": \"2026-11-06T14:05:24.029Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0005\",\n      \"ip\": \"::1\"\n    },\n    {\n      \"at\": \"2026-11-06T14:05:23.967Z\",\n      \"ok\": true,\n      \"code\": \"\",\n      \"deviceId\": \"PC-TEST-0005\",\n      \"ip\": \"::1\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.10 Session with NO hash header at all -> still 200, flagged as (none)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buildToken}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{buildDeviceId}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            },
+            "description": "An old game build that does not send `X-Build-Hash` at all is treated the same as an unrecognized one: logged (`hash: \"(none)\"`), not rejected, in soft mode."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{buildToken}}"
+                  },
+                  {
+                    "key": "X-Device-Id",
+                    "value": "{{buildDeviceId}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "session"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"session valid\",\n  \"user\": {\n    \"username\": \"tmw51r57u_build\",\n    \"type\": \"streamer\"\n  },\n  \"session\": {\n    \"expiresAt\": \"2026-12-06T14:05:24.028Z\"\n  },\n  \"subscription\": {\n    \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n    \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n    \"daysLeft\": 30\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.11 Clear the build alert -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{buildUserId}}/clear-build-alert",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{buildUserId}}",
+                "clear-build-alert"
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "pm.test('suspiciousBuild cleared', () => pm.expect(pm.response.json().user.suspiciousBuild).to.eql(null));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/{{buildUserId}}/clear-build-alert",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "{{buildUserId}}",
+                    "clear-build-alert"
+                  ]
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"alert cleared\",\n  \"user\": {\n    \"id\": \"6aeddea3bf968ea611cc5a21\",\n    \"type\": \"streamer\",\n    \"gameId\": \"flying-bird\",\n    \"username\": \"tmw51r57u_build\",\n    \"note\": \"\",\n    \"deviceId\": \"PC-TEST-0005\",\n    \"deviceBoundAt\": \"2026-11-06T14:05:23.963Z\",\n    \"lastLoginAt\": \"2026-11-06T14:05:24.028Z\",\n    \"lastSeenAt\": \"2026-11-06T14:05:24.028Z\",\n    \"sessionExpiresAt\": \"2026-12-06T14:05:24.028Z\",\n    \"lastLoginIp\": \"::1\",\n    \"wrongDevice\": null,\n    \"suspiciousBuild\": null,\n    \"subscription\": {\n      \"status\": \"active\",\n      \"startsAt\": \"2026-11-06T14:05:21.834Z\",\n      \"endsAt\": \"2026-12-06T14:05:21.834Z\",\n      \"daysLeft\": 30\n    },\n    \"banned\": false,\n    \"banReason\": \"\",\n    \"bannedAt\": null,\n    \"createdAt\": \"2026-11-06T14:05:23.900Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.12 [reference] Hard mode: unrecognized build -> 403 BUILD_MISMATCH  [reference]",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buildToken}}"
+              },
+              {
+                "key": "X-Device-Id",
+                "value": "{{buildDeviceId}}"
+              },
+              {
+                "key": "X-Build-Hash",
+                "value": "{{wrongBuildHash}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/session",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "session"
+              ]
+            },
+            "description": "**Reference only (skipped when running).** This needs the server started with `ENFORCE_BUILD_CHECK=true`, which this collection run does not control. Once enabled, /login, /session and /play all reject an unrecognized or missing hash with this error — register every official build's hash first (8.2), or legitimate players get locked out too."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Reference only: this case cannot be reproduced from Postman (see the description).",
+                  "// The saved example (Examples dropdown on the right) shows the exact response.",
+                  "pm.execution.skipRequest();"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "403 Forbidden BUILD_MISMATCH",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{buildToken}}"
+                  },
+                  {
+                    "key": "X-Device-Id",
+                    "value": "{{buildDeviceId}}"
+                  },
+                  {
+                    "key": "X-Build-Hash",
+                    "value": "{{wrongBuildHash}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/session",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "session"
+                  ]
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"BUILD_MISMATCH\",\n  \"message\": \"unrecognized game build\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.13 Delete the build hash (revoke) -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds/{{buildId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds",
+                "{{buildId}}"
+              ]
+            },
+            "description": "Use this to revoke an old or leaked build so it is treated as unrecognized again."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds/{{buildId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds",
+                    "{{buildId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"build revoked\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.14 Delete a build that does not exist -> 404 NOT_FOUND",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds/000000000000000000000000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds",
+                "000000000000000000000000"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 404', () => pm.response.to.have.status(404));",
+                  "pm.test('code = NOT_FOUND', () => pm.expect(pm.response.json().code).to.eql('NOT_FOUND'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "404 Not Found NOT_FOUND",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds/000000000000000000000000",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds",
+                    "000000000000000000000000"
+                  ]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"NOT_FOUND\",\n  \"message\": \"build not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.15 No admin token -> 401 NO_TOKEN",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/builds",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "builds"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', () => pm.response.to.have.status(401));",
+                  "pm.test('code = NO_TOKEN', () => pm.expect(pm.response.json().code).to.eql('NO_TOKEN'));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "401 Unauthorized NO_TOKEN",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/builds",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "builds"
+                  ]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": false,\n  \"code\": \"NO_TOKEN\",\n  \"message\": \"admin token required\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "8.16 Delete the test account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/{{buildUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users",
+                "{{buildUserId}}"
+              ]
+            },
+            "description": ""
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{adminToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/admin/users/{{buildUserId}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "admin",
+                    "users",
+                    "{{buildUserId}}"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"message\": \"account deleted\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "9. Cleanup",
       "description": "Deletes the test accounts made by this run.",
       "item": [
         {
@@ -7693,6 +9039,30 @@
     {
       "key": "days27Ago",
       "value": ""
+    },
+    {
+      "key": "officialBuildHash",
+      "value": "079e2e408a35ab75a077e6c8fa7fbe716b23ca5920c84ee654542db2c2693b34"
+    },
+    {
+      "key": "wrongBuildHash",
+      "value": "deadbeef00000000000000000000000000000000"
+    },
+    {
+      "key": "buildId",
+      "value": ""
+    },
+    {
+      "key": "buildUserId",
+      "value": ""
+    },
+    {
+      "key": "buildToken",
+      "value": ""
+    },
+    {
+      "key": "buildDeviceId",
+      "value": "PC-TEST-0005"
     }
   ]
 }

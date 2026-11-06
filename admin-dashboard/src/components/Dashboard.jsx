@@ -7,6 +7,7 @@ import UsersTable from "./UsersTable.jsx";
 import Toast from "./Toast.jsx";
 import Modal from "./Modal.jsx";
 import GameModal from "./GameModal.jsx";
+import BuildsCard from "./BuildsCard.jsx";
 import { SECTIONS } from "../sections.js";
 
 const REFRESH_MS = 15000;
@@ -121,6 +122,14 @@ export default function Dashboard({ onLogout }) {
           <SignupsChart data={stats ? stats.loginsPerDay : null} />
           <GamesCard games={games} stats={stats} onChanged={reload} notify={notify} />
         </div>
+
+        {gameId !== "all" && (
+          <BuildsCard
+            gameId={gameId}
+            gameName={(games.find((g) => g.gameId === gameId) || {}).name || gameId}
+            notify={notify}
+          />
+        )}
 
         <UsersTable key={type} type={type} gameId={gameId} games={games} tick={tick} onChanged={reload} notify={notify} />
       </main>

@@ -34,4 +34,9 @@ module.exports = {
   // Which websites may call this API from the browser (the admin dashboard).
   // "*" = any. Example: http://localhost:5173,https://admin.mygame.com
   corsOrigins: list(process.env.CORS_ORIGINS, "*"),
+
+  // Build integrity check (X-Build-Hash header, see builds.js). Off by default: unrecognized
+  // builds are only logged on the account (dashboard shows an alert), never rejected.
+  // Turn on once the admin has registered the official build hash(es) for every live game.
+  enforceBuildCheck: (process.env.ENFORCE_BUILD_CHECK || "").trim().toLowerCase() === "true",
 };

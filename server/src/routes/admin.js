@@ -7,6 +7,8 @@ const config = require("../config");
 const requireAdmin = require("../middleware/requireAdmin");
 const Game = require("../models/Game");
 const games = require("../games");
+const AllowedBuild = require("../models/AllowedBuild");
+const builds = require("../builds");
 const { createLimiter } = require("../middleware/rateLimit");
 const { signAdminToken, safeEqual } = require("../tokens");
 const {
@@ -14,6 +16,7 @@ const {
   validatePassword,
   validateGameId,
   validateGameName,
+  validateBuildHash,
   validateMonths,
   parseDate,
   subscriptionInfo,
@@ -79,6 +82,7 @@ function toAdminUser(u) {
     sessionExpiresAt: u.sessionExpiresAt || null,
     lastLoginIp: u.lastLoginIp || "",
     wrongDevice: u.lastRejectedDeviceAt ? { at: u.lastRejectedDeviceAt, deviceId: u.lastRejectedDeviceId } : null,
+    suspiciousBuild: u.lastSuspiciousBuildAt ? { at: u.lastSuspiciousBuildAt, hash: u.lastSuspiciousBuildHash } : null,
     subscription: subscriptionInfo(u),
     banned: !!u.banned,
     banReason: u.banReason || "",
@@ -404,12 +408,53 @@ router.post("/users/:id/subscription", handle(async (req, res) => {
 router.post("/users/:id/clear-alert", handle((req, res) =>
   update(req, res, { $set: { lastRejectedDeviceAt: null, lastRejectedDeviceId: null } }, "alert cleared")));
 
+// POST /api/admin/users/:id/clear-build-alert  -> hide the "suspicious build" alert
+router.post("/users/:id/clear-build-alert", handle((req, res) =>
+  update(req, res, { $set: { lastSuspiciousBuildAt: null, lastSuspiciousBuildHash: null } }, "alert cleared")));
+
 // DELETE /api/admin/users/:id
 router.delete("/users/:id", handle(async (req, res) => {
   const user = await findUserOr404(req, res);
   if (!user) return;
   await Promise.all([User.deleteOne({ _id: user._id }), LoginEvent.deleteMany({ userId: user._id })]);
   res.json({ ok: true, message: "account deleted" });
+}));
+
+// ---------------------------------------------------------------------------
+// Build integrity (see server/src/builds.js). Off (log-only) until ENFORCE_BUILD_CHECK=true.
+// ---------------------------------------------------------------------------
+
+// GET /api/admin/builds?gameId=   -> registered official build hashes, newest first
+router.get("/builds", handle(async (req, res) => {
+  const list = await builds.list(String(req.query.gameId || "").toLowerCase().trim() || undefined);
+  res.json({ ok: true, enforced: config.enforceBuildCheck, builds: list });
+}));
+
+// POST /api/admin/builds  { gameId, hash, label }   -> register an official release's hash
+router.post("/builds", handle(async (req, res) => {
+  const gameId = String((req.body && req.body.gameId) || "").toLowerCase().trim();
+  const hash = String((req.body && req.body.hash) || "").toLowerCase().trim();
+  const label = String((req.body && req.body.label) || "").slice(0, 100);
+  if (games.isActive(gameId) === "unknown") return fail(res, 400, "UNKNOWN_GAME", "unknown gameId");
+  if (!validateBuildHash(hash))
+    return fail(res, 400, "INVALID_INPUT", "hash must be a 40 or 64 char hex sha1/sha256 digest");
+  try {
+    const build = await AllowedBuild.create({ gameId, hash, label });
+    await builds.refresh();
+    res.status(201).json({ ok: true, message: "build registered", build });
+  } catch (e) {
+    if (e.code === 11000) return fail(res, 409, "BUILD_EXISTS", "this hash is already registered for this game");
+    throw e;
+  }
+}));
+
+// DELETE /api/admin/builds/:id   -> revoke (e.g. a leaked / outdated build)
+router.delete("/builds/:id", handle(async (req, res) => {
+  if (!mongoose.isValidObjectId(req.params.id)) return fail(res, 404, "NOT_FOUND", "build not found");
+  const r = await AllowedBuild.deleteOne({ _id: req.params.id });
+  if (!r.deletedCount) return fail(res, 404, "NOT_FOUND", "build not found");
+  await builds.refresh();
+  res.json({ ok: true, message: "build revoked" });
 }));
 
 module.exports = router;

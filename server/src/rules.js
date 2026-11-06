@@ -2,6 +2,7 @@
 
 const USERNAME_RE = /^[a-zA-Z0-9_.-]{3,30}$/;
 const GAME_ID_RE = /^[a-z0-9][a-z0-9-]{1,39}$/;
+const BUILD_HASH_RE = /^[a-f0-9]{40,64}$/; // sha1 (40) or sha256 (64) hex digest of the game's own executable
 const DEVICE_RE = /^[a-zA-Z0-9-]{8,64}$/;
 
 function validateUsername(username) {
@@ -25,6 +26,10 @@ function validateGameId(gameId) {
 function validateGameName(name) {
   if (typeof name !== "string" || !name.trim() || name.trim().length > 60) return "name must be 1-60 chars";
   return null;
+}
+
+function validateBuildHash(hash) {
+  return typeof hash === "string" && BUILD_HASH_RE.test(hash);
 }
 
 function validateDeviceId(deviceId) {
@@ -163,6 +168,7 @@ module.exports = {
   validateDeviceId,
   validateGameId,
   validateGameName,
+  validateBuildHash,
   deviceDecision,
   addMonths,
   validateMonths,

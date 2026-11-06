@@ -2,6 +2,7 @@ const User = require("../models/User");
 const { verifyPlayerToken, deviceHash } = require("../tokens");
 const config = require("../config");
 const games = require("../games");
+const builds = require("../builds");
 const { subscriptionStatus, canPlay, SUB_ERRORS, sessionExpired, shouldExtendSession } = require("../rules");
 
 const fail = (res, status, code, message, extra = {}) =>
@@ -42,6 +43,19 @@ module.exports = async function requireAuth(req, res, next) {
     if (!user) return fail(res, 401, "TOKEN_INVALID", "account not found");
     if (user.banned) return fail(res, 403, "BANNED", "this account is banned", { reason: user.banReason || "" });
     if (games.isActive(user.gameId) !== "ok") return fail(res, 403, "GAME_DISABLED", "this game is disabled");
+
+    // Build integrity check (see builds.js). Off by default (ENFORCE_BUILD_CHECK): only
+    // flagged on the account for the dashboard, never rejected, until the admin turns it on.
+    const buildHeader = String(req.headers["x-build-hash"] || "").toLowerCase();
+    const buildStatus = builds.check(user.gameId, buildHeader);
+    if (buildStatus !== "ok") {
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { lastSuspiciousBuildAt: new Date(), lastSuspiciousBuildHash: buildHeader || "(none)" } }
+      );
+      if (config.enforceBuildCheck)
+        return fail(res, 403, "BUILD_MISMATCH", "unrecognized game build");
+    }
     const status = subscriptionStatus(user);
     if (!canPlay(status)) {
       const e = SUB_ERRORS[status];

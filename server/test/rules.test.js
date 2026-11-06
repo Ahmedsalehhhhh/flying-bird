@@ -15,6 +15,7 @@ const {
   shouldExtendSession,
   validateGameId,
   validateGameName,
+  validateBuildHash,
 } = require("../src/rules");
 
 const D = (s) => new Date(s);
@@ -164,4 +165,13 @@ test("game name validation", () => {
   assert.ok(validateGameName("   "));
   assert.ok(validateGameName("x".repeat(61)));
   assert.ok(validateGameName(undefined));
+});
+
+test("build hash validation", () => {
+  assert.ok(validateBuildHash("a".repeat(40))); // sha1-length hex
+  assert.ok(validateBuildHash("a".repeat(64))); // sha256-length hex
+  assert.ok(!validateBuildHash("a".repeat(39)));
+  assert.ok(!validateBuildHash("g".repeat(40))); // not hex
+  assert.ok(!validateBuildHash(""));
+  assert.ok(!validateBuildHash(undefined));
 });
