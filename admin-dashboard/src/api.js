@@ -107,10 +107,6 @@ export const api = {
   setPassword: (id, newPassword) => request("POST", `/admin/users/${id}/password`, { newPassword }),
   remove: (id) => request("DELETE", `/admin/users/${id}`),
   clearAlert: (id) => request("POST", `/admin/users/${id}/clear-alert`, {}),
-  clearBuildAlert: (id) => request("POST", `/admin/users/${id}/clear-build-alert`, {}),
-  builds: (gameId) => request("GET", "/admin/builds" + qs({ gameId })),
-  addBuild: (gameId, hash, label) => request("POST", "/admin/builds", { gameId, hash, label }),
-  removeBuild: (id) => request("DELETE", `/admin/builds/${id}`, {}),
 };
 
 // Arabic messages for the error codes the server returns.
@@ -126,8 +122,6 @@ const MESSAGES = {
   GAME_DISABLED: "اللعبة دي موقوفة: شغّلها الأول",
   GAME_EXISTS: "فيه لعبة بالـ gameId ده قبل كده",
   GAME_HAS_USERS: "اللعبة عليها حسابات: وقّفها بدل ما تمسحها، أو امسح حساباتها الأول",
-  BUILD_EXISTS: "الـ hash ده متسجل قبل كده لنفس اللعبة",
-  BUILD_MISMATCH: "نسخة اللعبة دي مش معروفة",
   SERVER_ERROR: "حصل خطأ في السيرفر",
   NO_SUBSCRIPTION: "الحساب مالوش اشتراك",
   SUBSCRIPTION_NOT_STARTED: "الاشتراك لسه مابدأش",

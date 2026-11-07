@@ -28,10 +28,6 @@ const userSchema = new mongoose.Schema(
     lastRejectedDeviceAt: { type: Date, default: null },
     lastRejectedDeviceId: { type: String, default: null },
 
-    // Last request with a missing/unrecognized build hash (shown as an alert; see builds.js).
-    lastSuspiciousBuildAt: { type: Date, default: null },
-    lastSuspiciousBuildHash: { type: String, default: null }, // "(none)" when no header was sent at all
-
     // Subscription: streamers can only log in between these dates (set by the admin).
     // Agency accounts without dates never expire.
     subscriptionStartsAt: { type: Date, default: null },

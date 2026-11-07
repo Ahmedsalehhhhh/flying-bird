@@ -5,7 +5,6 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const config = require("./config");
 const games = require("./games");
-const builds = require("./builds");
 const authRoutes = require("./routes/auth");
 const adminRoutes = require("./routes/admin");
 
@@ -50,7 +49,6 @@ mongoose
   .then(async () => {
     console.log("MongoDB connected");
     await games.load(); // games from the database (+ GAMES from .env added once if missing)
-    await builds.load(); // registered official build hashes
     app.listen(config.port, () =>
       console.log(`Auth server on port ${config.port} | games: ${games.list().map((g) => g.gameId + (g.active ? "" : " (disabled)")).join(", ")}`)
     );
